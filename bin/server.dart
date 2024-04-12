@@ -4,8 +4,10 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 
 import 'commands/ping_commands.dart';
 import 'commands/roll_commands.dart';
+import 'commands/systems_command.dart';
 
 void main() async {
+
   //load env variables
   var env = DotEnv(includePlatformEnvironment: true)..load();
   //register prefix for commands (Mention or !)
@@ -15,6 +17,9 @@ void main() async {
   //add command to command list
   commands.addCommand(ping);
   commands.addCommand(roll);
+  commands.addCommand(systems);
+  commands.addCommand(setSystem);
+  commands.addCommand(getSystem);
 
   //create the client with connection info
   final client = await Nyxx.connectGateway(
