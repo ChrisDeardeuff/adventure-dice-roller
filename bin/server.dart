@@ -1,10 +1,8 @@
+import 'package:adventure_dice_roller/server.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:dotenv/dotenv.dart' show DotEnv;
 import 'package:nyxx_commands/nyxx_commands.dart';
 
-import 'commands/ping_commands.dart';
-import 'commands/roll_commands.dart';
-import 'commands/systems_command.dart';
 
 void main() async {
 
@@ -24,7 +22,7 @@ void main() async {
   //create the client with connection info
   final client = await Nyxx.connectGateway(
     env['API_TOKEN']!,
-    GatewayIntents.allUnprivileged,
+    GatewayIntents.messageContent,
     options: GatewayClientOptions(plugins: [logging, cliIntegration,commands]),
   );
 

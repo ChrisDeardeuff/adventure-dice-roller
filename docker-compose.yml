@@ -1,0 +1,7 @@
+version: '3.9'
+services:
+  adventure-dice-roller:
+    build: .
+    container_name: adventure-dice-roller
+    env_file:
+      - .env
