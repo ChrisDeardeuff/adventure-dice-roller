@@ -5,7 +5,11 @@ import '../services/user_services.dart';
 import '../models/systems.dart';
 
 UserServices us = UserServices();
-final hiddenMessage = ResponseLevel(hideInteraction: true, isDm: false, mention: true, preserveComponentMessages: true);
+final hiddenMessage = ResponseLevel(
+    hideInteraction: true,
+    isDm: false,
+    mention: true,
+    preserveComponentMessages: true);
 final systems = ChatCommand(
   'systems',
   "List available systems",
@@ -14,7 +18,8 @@ final systems = ChatCommand(
     for (var system in System.values) {
       sysList = "$sysList ${system.name},";
     }
-    await context.respond(MessageBuilder(content: sysList),level: hiddenMessage);
+    await context.respond(MessageBuilder(content: sysList),
+        level: hiddenMessage);
   },
 );
 
@@ -29,8 +34,7 @@ final setSystem = ChatCommand(
 
     var user = us.registerUser(context.user.id);
 
-    switch(selection){
-
+    switch (selection) {
       case "none":
         user.selectedSystem = System.none;
       case "asoif":
@@ -40,16 +44,20 @@ final setSystem = ChatCommand(
       case "dnd":
         user.selectedSystem = System.dnd;
     }
-    await context.respond(MessageBuilder(content: "System Set to $selection!"),level: hiddenMessage);
+    await context.respond(MessageBuilder(content: "System Set to $selection!"),
+        level: hiddenMessage);
   },
 );
 
 final getSystem = ChatCommand(
   'get-system',
   "get current user's active system",
-      (ChatContext context) async {
-
+  (ChatContext context) async {
     var user = us.registerUser(context.user.id);
-    await context.respond(MessageBuilder(replyId:user.id, content: "System Set to ${user.selectedSystem.name}!"),level: hiddenMessage);
+    await context.respond(
+        MessageBuilder(
+            replyId: user.id,
+            content: "System Set to ${user.selectedSystem.name}!"),
+        level: hiddenMessage);
   },
 );
