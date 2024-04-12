@@ -3,14 +3,11 @@ import 'package:nyxx/nyxx.dart';
 import 'package:dotenv/dotenv.dart' show DotEnv;
 import 'package:nyxx_commands/nyxx_commands.dart';
 
-
 void main() async {
-
   //load env variables
   var env = DotEnv(includePlatformEnvironment: true)..load();
   //register prefix for commands (Mention or !)
-  final commands = CommandsPlugin(prefix: mentionOr((_)=>'!'));
-
+  final commands = CommandsPlugin(prefix: mentionOr((_) => '!'));
 
   //add command to command list
   commands.addCommand(ping);
@@ -23,7 +20,7 @@ void main() async {
   final client = await Nyxx.connectGateway(
     env['API_TOKEN']!,
     GatewayIntents.messageContent,
-    options: GatewayClientOptions(plugins: [logging, cliIntegration,commands]),
+    options: GatewayClientOptions(plugins: [logging, cliIntegration, commands]),
   );
 
   final botUser = await client.users.fetchCurrentUser();

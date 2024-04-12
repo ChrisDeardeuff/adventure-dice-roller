@@ -1,1 +1,1 @@
-enum System {none,asoif,age,dnd}
+enum System { none, asoif, age, dnd }
