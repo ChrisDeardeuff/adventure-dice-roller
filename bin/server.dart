@@ -1,33 +1,37 @@
-import 'dart:io';
+import 'package:nyxx/nyxx.dart';
+import 'package:dotenv/dotenv.dart' show DotEnv;
+import 'package:nyxx_commands/nyxx_commands.dart';
 
-import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart';
-import 'package:shelf_router/shelf_router.dart';
+import 'commands/ping_commands.dart';
+import 'commands/roll_commands.dart';
 
-// Configure routes.
-final _router = Router()
-  ..get('/', _rootHandler)
-  ..get('/echo/<message>', _echoHandler);
+void main() async {
+  //load env variables
+  var env = DotEnv(includePlatformEnvironment: true)..load();
+  //register prefix for commands (Mention or !)
+  final commands = CommandsPlugin(prefix: mentionOr((_)=>'!'));
 
-Response _rootHandler(Request req) {
-  return Response.ok('Hello, World!\n');
-}
 
-Response _echoHandler(Request request) {
-  final message = request.params['message'];
-  return Response.ok('$message\n');
-}
+  //add command to command list
+  commands.addCommand(ping);
+  commands.addCommand(roll);
 
-void main(List<String> args) async {
-  // Use any available host or container IP (usually `0.0.0.0`).
-  final ip = InternetAddress.anyIPv4;
+  //create the client with connection info
+  final client = await Nyxx.connectGateway(
+    env['API_TOKEN']!,
+    GatewayIntents.allUnprivileged,
+    options: GatewayClientOptions(plugins: [logging, cliIntegration,commands]),
+  );
 
-  // Configure a pipeline that logs requests.
-  final handler =
-      Pipeline().addMiddleware(logRequests()).addHandler(_router.call);
+  final botUser = await client.users.fetchCurrentUser();
 
-  // For running in containers, we respect the PORT environment variable.
-  final port = int.parse(Platform.environment['PORT'] ?? '8080');
-  final server = await serve(handler, ip, port);
-  print('Server listening on port ${server.port}');
+  //listen for a mention of
+  client.onMessageCreate.listen((event) async {
+    if (event.mentions.contains(botUser)) {
+      await event.message.channel.sendMessage(MessageBuilder(
+        content: 'Hi There!',
+        replyId: event.message.id,
+      ));
+    }
+  });
 }
