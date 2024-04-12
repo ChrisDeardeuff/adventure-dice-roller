@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:adventure_dice_roller/server.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:dotenv/dotenv.dart' show DotEnv;
@@ -5,7 +7,7 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 
 void main() async {
   //load env variables
-  var env = DotEnv(includePlatformEnvironment: true)..load();
+  final apiToken = Platform.environment['API_TOKEN'];
   //register prefix for commands (Mention or !)
   final commands = CommandsPlugin(prefix: mentionOr((_) => '!'));
 
@@ -18,7 +20,7 @@ void main() async {
 
   //create the client with connection info
   final client = await Nyxx.connectGateway(
-    env['API_TOKEN']!,
+    apiToken!,
     GatewayIntents.messageContent,
     options: GatewayClientOptions(plugins: [logging, cliIntegration, commands]),
   );
