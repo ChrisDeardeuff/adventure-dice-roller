@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:nyxx/nyxx.dart' as nyxx;
 
 import '../models/user.dart';
