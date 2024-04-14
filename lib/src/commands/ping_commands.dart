@@ -26,3 +26,14 @@ final ping = ChatCommand(
         await context.respond(MessageBuilder(content: '${formattedLatency}ms'));
       },
     ));
+
+final help = ChatCommand(
+    'help',
+    "List help resources",
+    id(
+      'help',
+      (ChatContext context) async {
+
+        await context.respond(MessageBuilder(content: ''));
+      },
+    ));

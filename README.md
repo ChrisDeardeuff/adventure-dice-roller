@@ -1,30 +1,38 @@
-Currently the existing dice bots on Discord are all geared toward specific systems. Avrae for D&D, and others for
-smaller more niche systems.
+# Adventure Dice Roller
 
-## Requirements:
+The ADR is a discord bot designed to work with multiple table-top role playing (TTRPG) systems. 
+Currently, the bot supports:
+* ASOIF RPG (https://greenronin.com/sifrp/)
+* AGE system (https://greenroninstore.com/collections/age-system)
+* DnD 5e (https://dnd.wizards.com)
 
-* Ability to change system
-    * this will determine what valid rolls are
-        * can be used to simplify commands (if a system only ever rolls 3D6, the command could just be /roll and it will
-          always roll 3D6 (instead of having to specify)
-* modifiers (math, common alterations, etc..)
-* quick rolls
+It also supports just rolling some dice with no system selected to allow for some flexibility. 
 
-## How to do this:
+### Supported Commands
+> /help - prints this info!
 
-* user class
-    * uuid
-    * current system
-    * table of quick rolls
-* stored user info in Firebase
+#### Systems
+> /systems - prints the available systems
 
-## Commands:
+> /set-system - provides a selectable drop-down list of systems.
 
-|                         |            |                                                                                                      |                                                                                                |
-|-------------------------|------------|------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| Command Name            | Variables  | Description                                                                                          | Notes                                                                                          |
-| /system \[system name\] | sysName    | Sets the users preferred system.                                                                     | sysName required                                                                               |
-| /roll \[n\] (dx) (mod)  | n, dx, mod | Rolls n dice of x sides with any modifications                                                       | modifications will be defined later but will be a string that has to follow specific formating |
-| /qr \[x\]               | x          | quick roll will roll a pre configured roll from the users settings. It must be a valid /roll command | x is number from 1-10. 10 is the max number of quick rolls allowed to be saved.                |
-| /qrs \[n\] \[r\]        | n, r       | n is the number 1-10  r is the valid roll                                                            |                                                                                                |
-|                         |            |                                                                                                      |                                                                                                |
+> /get-system - returns the current system that you're account is using.
+
+#### Rolls
+
+##### No system (none)
+> /roll xdy - where x is the number of dice (1-999999) and y is the number of sides (1-999999)<br>
+> example: /roll 5d6<br>
+> output: [6,3,5,1,1]
+
+##### A Song of Ice and Fire RPG (asoif)
+
+> /roll xby - where x is the number of dice (1-999999) and b is the number of bonus dice (1-999999)<br>
+> example: /roll 5b6<br>
+> output: Rolled: [6, 6, 6, 6, 5, 5, 3, 3, 2, 1, 1]. The highest 5 is: [6, 6, 6, 6, 5] = 29
+
+##### Advanced Game Engine (age)
+
+> /roll x - where x is the modifier (0-9) you want added to your roll. This roll will also check for doubles and calculate stunt points <br>
+> example: /roll 4<br>
+> output: Rolled: [4, 1, 4] + 4 = 13 and generated 4 stunt points!

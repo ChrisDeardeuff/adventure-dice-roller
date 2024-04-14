@@ -23,7 +23,7 @@ final attack = ChatCommand(
         }
 
         var isCrit = (roll >= 2 * targetsArmorRating);
-        var degreesOfSuccess = ((roll - targetsCombatDefense) / 5).floor();
+        var degreesOfSuccess = ((roll - targetsCombatDefense) / 5).ceil();
         var critEffect = "";
         var damageDealt = 0;
 
@@ -55,7 +55,7 @@ final attack = ChatCommand(
           damageDealt = (baseDamage * degreesOfSuccess) - targetsArmorRating;
           await context.respond(MessageBuilder(
               content:
-                  'An attack of $roll (with $numberOfSixes) is $degreesOfSuccess degrees of success and is a critical strike, resulting in $damageDealt damage $critEffect'));
+                  'An attack of $roll (with $numberOfSixes sixes) is $degreesOfSuccess degrees of success and is a critical strike, resulting in $damageDealt damage $critEffect'));
           return;
         } else {
           damageDealt = (baseDamage * degreesOfSuccess) - targetsArmorRating;
