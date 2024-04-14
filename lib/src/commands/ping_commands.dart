@@ -33,7 +33,6 @@ final help = ChatCommand(
     id(
       'help',
       (ChatContext context) async {
-
         await context.respond(MessageBuilder(content: ''));
       },
     ));
