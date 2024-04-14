@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:adventure_dice_roller/server.dart';
+import 'package:adventure_dice_roller/src/commands/asoif_commands.dart';
 import 'package:nyxx/nyxx.dart';
-import 'package:dotenv/dotenv.dart' show DotEnv;
 import 'package:nyxx_commands/nyxx_commands.dart';
 
 void main() async {
@@ -17,6 +17,7 @@ void main() async {
   commands.addCommand(systems);
   commands.addCommand(setSystem);
   commands.addCommand(getSystem);
+  commands.addCommand(attack);
 
   //create the client with connection info
   final client = await Nyxx.connectGateway(

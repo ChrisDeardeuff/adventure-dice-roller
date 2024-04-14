@@ -24,7 +24,8 @@ final roll = ChatCommand(
 
         List<int> rolls = [];
         var sum = 0;
-        var rollPattern = RegExp(r'\b[0-9]{1,6}d{1}[0-9]{1,6}');
+        var rollPattern = RegExp(r'\b[0-9]{1,6}d[0-9]{1,6}');
+
         switch (system) {
           case System.none:
             if (selection == null || !rollPattern.hasMatch(selection)) {
@@ -48,7 +49,7 @@ final roll = ChatCommand(
             return;
 
           case System.asoif:
-            rollPattern = RegExp(r'\b[0-9]{1,6}b{1}[0-9]{1,6}');
+            rollPattern = RegExp(r'\b[0-9]{1,6}b[0-9]{1,6}');
 
             if (selection == null || !rollPattern.hasMatch(selection)) {
               await context.respond(
