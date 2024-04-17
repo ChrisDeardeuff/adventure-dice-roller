@@ -4,6 +4,8 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 import '../../server.dart';
 import '../models/systems.dart';
 
+final Logger _logger = Logger('ADR.SystemRolls');
+
 final systems = ChatCommand(
     'systems',
     "List available systems",
@@ -30,7 +32,7 @@ final setSystem = ChatCommand(
           MessageBuilder(content: 'Choose the system you want to use'),
         );
 
-        var user = us.registerUser(context.user.id);
+        var user = await us.registerUser(context.user.id);
 
         switch (selection) {
           case "none":
@@ -42,6 +44,9 @@ final setSystem = ChatCommand(
           case "dnd":
             user.selectedSystem = System.dnd;
         }
+
+        us.userSetSystem(user);
+
         await context.respond(
             MessageBuilder(content: "System Set to $selection!"),
             level: hiddenMessage);
@@ -54,7 +59,9 @@ final getSystem = ChatCommand(
     id(
       'get-system',
       (ChatContext context) async {
-        var user = us.registerUser(context.user.id);
+        _logger.info("get-system");
+        var user = await us.registerUser(context.user.id);
+
         await context.respond(
             MessageBuilder(
                 replyId: user.id,

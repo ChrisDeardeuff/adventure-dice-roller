@@ -6,6 +6,9 @@ import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 
 void main() async {
+  UserServices us = UserServices();
+  us.mongoInit();
+
   //load env variables
   final apiToken = Platform.environment['API_TOKEN'];
   //register prefix for commands (Mention or !)

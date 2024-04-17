@@ -19,7 +19,7 @@ final roll = ChatCommand(
     id(
       'roll',
       (ChatContext context, [String? selection]) async {
-        var user = us.registerUser(context.user.id);
+        var user = await us.registerUser(context.user.id);
         var system = user.selectedSystem;
 
         List<int> rolls = [];

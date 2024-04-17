@@ -9,6 +9,7 @@ environment:
 dependencies:
   args: ^2.4.0
   dotenv: ^4.2.0
+  mongo_dart: ^0.10.1
   nyxx: ^6.2.1
   nyxx_commands: ^6.0.2
   shelf: ^1.4.0

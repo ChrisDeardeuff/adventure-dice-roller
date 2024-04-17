@@ -28,7 +28,7 @@ final attack = ChatCommand(
         var damageDealt = 0;
 
         if (degreesOfSuccess > 4) {
-          degreesOfSuccess == 4;
+          degreesOfSuccess = 4;
         }
 
         if (isCrit) {
