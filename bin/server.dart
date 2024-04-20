@@ -23,6 +23,7 @@ void main() async {
   commands.addCommand(attack);
   commands.addCommand(setQr);
   commands.addCommand(qr);
+  commands.addCommand(help);
 
   //create the client with connection info
   final client = await Nyxx.connectGateway(

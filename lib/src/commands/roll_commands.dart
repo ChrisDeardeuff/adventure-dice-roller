@@ -64,9 +64,11 @@ final setQr = ChatCommand(
     'set-qr',
     (ChatContext context, [String? num, String? roll]) async {
       if (num == null || roll == null) {
-        await context.respond(MessageBuilder(
-            content:
-                'Error setting quick roll, please make sure all values are set. Refer to /help if you need help'));
+        await context.respond(
+            MessageBuilder(
+                content:
+                    'Error setting quick roll, please make sure all values are set. Refer to /help if you need help'),
+            level: hiddenMessage);
         return;
       }
       var user = await us.registerUser(context.user.id);
@@ -74,9 +76,11 @@ final setQr = ChatCommand(
       var numOfQR = int.parse(num);
 
       if (!(numOfQR <= 10 && numOfQR >= 1)) {
-        await context.respond(MessageBuilder(
-            content:
-                'Error setting quick roll, please make sure your number is between 1-10'));
+        await context.respond(
+            MessageBuilder(
+                content:
+                    'Error setting quick roll, please make sure your number is between 1-10'),
+            level: hiddenMessage);
         return;
       }
       //check if a roll was provided, it is a valid roll for the system, and the number is 1-10
@@ -93,15 +97,18 @@ final setQr = ChatCommand(
         }
       } else {
         _logger.severe("Invalid Roll or Roll is Null");
-        await context.respond(MessageBuilder(
-            content:
-                'roll = $roll - is an invalid roll for system: ${system.name} '
-                'or roll parameter is empty, please try again or use /help for help'));
+        await context.respond(
+            MessageBuilder(
+                content:
+                    'roll = $roll - is an invalid roll for system: ${system.name} '
+                    'or roll parameter is empty, please try again or use /help for help'),
+            level: hiddenMessage);
         return;
       }
 
-      await context
-          .respond(MessageBuilder(content: 'quick roll $num, set to $roll'));
+      await context.respond(
+          MessageBuilder(content: 'quick roll $num, set to $roll'),
+          level: hiddenMessage);
     },
   ),
 );
@@ -113,9 +120,11 @@ final qr = ChatCommand(
     'qr',
     (ChatContext context, [String? num]) async {
       if (num == null) {
-        await context.respond(MessageBuilder(
-            content:
-                'Error rolling quick roll, please make sure all values are set. Refer to /help if you need help'));
+        await context.respond(
+            MessageBuilder(
+                content:
+                    'Error rolling quick roll, please make sure all values are set. Refer to /help if you need help'),
+            level: hiddenMessage);
         return;
       }
       var user = await us.registerUser(context.user.id);
@@ -123,9 +132,11 @@ final qr = ChatCommand(
       var numOfQR = int.parse(num);
 
       if (!(numOfQR <= 10 && numOfQR >= 1)) {
-        await context.respond(MessageBuilder(
-            content:
-                'Error rolling quick roll, please make sure your number is between 1-10'));
+        await context.respond(
+            MessageBuilder(
+                content:
+                    'Error rolling quick roll, please make sure your number is between 1-10'),
+            level: hiddenMessage);
         return;
       }
       var qrIndex = user.quickRolls
@@ -148,7 +159,8 @@ final qr = ChatCommand(
 
         case System.dnd:
           await context.respond(
-              MessageBuilder(content: "System is not implemented yet, sorry!"));
+              MessageBuilder(content: "System is not implemented yet, sorry!"),
+              level: hiddenMessage);
         // TODO: Handle this case.
       }
     },
