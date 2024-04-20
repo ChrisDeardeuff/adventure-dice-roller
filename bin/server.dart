@@ -21,6 +21,8 @@ void main() async {
   commands.addCommand(setSystem);
   commands.addCommand(getSystem);
   commands.addCommand(attack);
+  commands.addCommand(setQr);
+  commands.addCommand(qr);
 
   //create the client with connection info
   final client = await Nyxx.connectGateway(
