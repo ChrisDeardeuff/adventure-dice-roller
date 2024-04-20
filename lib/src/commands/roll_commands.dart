@@ -25,7 +25,7 @@ final roll = ChatCommand(
       var system = user.selectedSystem;
 
       //check if valid inputs
-      if (roll == null || isValidRoll(system, roll)) {
+      if (roll == null || !isValidRoll(system, roll)) {
         await context.respond(
             MessageBuilder(
                 content:
