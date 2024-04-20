@@ -144,6 +144,15 @@ final qr = ChatCommand(
 
       String roll = user.quickRolls[qrIndex].getQuickRoll(numOfQR);
       _logger.info('roll is $roll');
+      if (roll == 'empty') {
+        await context.respond(
+            MessageBuilder(
+                content:
+                    'Error rolling quick roll, please make sure the QR is set, see /help for help'),
+            level: hiddenMessage);
+        return;
+      }
+
       switch (system) {
         case System.none:
           await context.respond(MessageBuilder(content: rollNone(roll)));
