@@ -260,7 +260,7 @@ List<int> rollHelper({required int numberOfDice, required int numberOfSides}) {
   List<int> roll = [];
 
   for (int i = 0; i < numberOfDice; i++) {
-    roll.add((rng.nextInt(numberOfSides - 1) + 1));
+    roll.add((rng.nextInt(numberOfSides) + 1));
   }
 
   return roll;
