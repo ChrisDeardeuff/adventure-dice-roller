@@ -296,10 +296,11 @@ String rollDnd(String roll, String options) {
   final result2 = roll2 != null ? _applyModifiers(roll2, modifiers) : null;
 
   final hasNat20Roll1 = roll1.contains(1); // Check for a 20 in the first roll
-  final hasNat1Roll1 = roll1.contains(1);// Check for a 1 in the first roll
+  final hasNat1Roll1 = roll1.contains(1); // Check for a 1 in the first roll
 
   if (options.isEmpty) {
-    return _formatResult(roll, roll1, modifiers, result1, hasNat20Roll1, hasNat1Roll1);
+    return _formatResult(
+        roll, roll1, modifiers, result1, hasNat20Roll1, hasNat1Roll1);
   }
 
   // If there are options, determine best/worst roll
@@ -313,8 +314,8 @@ String rollDnd(String roll, String options) {
   final hasNat20AdvOrDis = bestRolls.contains(20);
   final hasNat1AdvOrDis = bestRolls.contains(1);
 
-  return _formatResult(roll, roll1, modifiers, bestResult, hasNat20AdvOrDis, hasNat1AdvOrDis,
-      options.toUpperCase(), roll2);
+  return _formatResult(roll, roll1, modifiers, bestResult, hasNat20AdvOrDis,
+      hasNat1AdvOrDis, options.toUpperCase(), roll2);
 }
 
 //DND HELPERS
@@ -353,15 +354,13 @@ int _applyModifiers(List<int> rolls, List<(String, int)> modifiers) {
 String _formatResult(String roll, List<int> rolls,
     List<(String, int)> modifiers, int sum, bool hasNat20, bool hasNat1,
     [String option = "", List<int>? secondRoll]) {
-
   final modifiersString = modifiers.map((m) => "${m.$1} ${m.$2}").join(" ");
   final optionString = option != ''
       ? " with ${option.toLowerCase() == 'a' ? "advantage" : "disadvantage"}"
       : "";
   final nat20Message = hasNat20 ? ' with a nat 20!' : '';
   final nat1Message = hasNat1 ? ' with a critical 1!' : '';
-  final secondRollString =
-      secondRoll ?? "";
+  final secondRollString = secondRoll ?? "";
 
   return '$roll$optionString: $rolls $secondRollString $modifiersString = $sum $nat20Message$nat1Message';
 }
