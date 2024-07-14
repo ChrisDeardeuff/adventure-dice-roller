@@ -28,7 +28,13 @@ final roll = ChatCommand(
   "Default roll for selected system! Visit the documentation or use /roll-help to see valid rolls",
   id(
     'roll',
-    (ChatContext context, [String? roll]) async {
+    (ChatContext context,
+        [@Description(
+            "Required option used to define a roll. Refer to /roll-help for more info")
+        String? roll,
+        @Description(
+            "Optional options used in some systems like 5e. Refer to /roll-help")
+        String options = '']) async {
       /// 1. Get user data (or create if new) and fetch their selected system.
       var user = await us.registerUser(context.user.id);
       var system = user.selectedSystem;
@@ -59,7 +65,8 @@ final roll = ChatCommand(
           return;
 
         case System.dnd:
-          await context.respond(MessageBuilder(content: rollDnd(roll)));
+          await context
+              .respond(MessageBuilder(content: rollDnd(roll, options)));
           return;
       }
     },
@@ -72,7 +79,13 @@ final setQr = ChatCommand(
   "Sets a quick roll, an easily executable roll for whatever system is selected",
   id(
     'set-qr',
-    (ChatContext context, [String? num, String? roll]) async {
+    (ChatContext context,
+        [@Description(
+            "Required option used to index a quick roll between 1-10. Refer to /help for more info")
+        String? num,
+        @Description(
+            "Required option used to define a roll. Refer to /roll-help for more info")
+        String? roll]) async {
       if (num == null || roll == null) {
         await context.respond(
             MessageBuilder(
@@ -178,7 +191,7 @@ final qr = ChatCommand(
           return;
 
         case System.dnd:
-          await context.respond(MessageBuilder(content: rollDnd(roll)));
+          await context.respond(MessageBuilder(content: rollDnd(roll, '')));
           return;
       }
     },
@@ -261,55 +274,99 @@ String rollAGE(String roll) {
   }
 }
 
-/// Rolls dice for Dungeons & Dragons system (DnD0)
-String rollDnd(String roll) {
-  final regex = RegExp(r'^(\d*)d(\d+)((?:[+\-*/]\d+)+)?$');
+String rollDnd(String roll, String options) {
+  final regex = RegExp(r'^(\d*)d(\d+)([+\-*/](\d+))*$');
   final match = regex.firstMatch(roll);
 
-  List<int> rolls = [];
-  var sum = 0;
-  String allMods = '';
+  if (match == null) return "";
 
-  final diceCount = int.tryParse(match!.group(1) ?? '1') ?? 1;
+  final diceCount = int.tryParse(match.group(1) ?? '1') ?? 1;
   final diceType = int.parse(match.group(2)!);
-
-  rolls = rollHelper(numberOfDice: diceCount, numberOfSides: diceType);
-  sum = rolls.reduce((value, element) => value + element);
-
-
-  // Apply modifiers
   final modifiersMatch = match.group(3);
+
+  // Roll dice twice if advantage or disadvantage is specified
+  final roll1 = rollHelper(numberOfDice: diceCount, numberOfSides: diceType);
+  final roll2 = options != ''
+      ? rollHelper(numberOfDice: diceCount, numberOfSides: diceType)
+      : null;
+
+  final modifiers = _parseModifiers(modifiersMatch);
+
+  final result1 = _applyModifiers(roll1, modifiers);
+  final result2 = roll2 != null ? _applyModifiers(roll2, modifiers) : null;
+
+  final hasNat20Roll1 = roll1.contains(1); // Check for a 20 in the first roll
+  final hasNat1Roll1 = roll1.contains(1);// Check for a 1 in the first roll
+
+  if (options.isEmpty) {
+    return _formatResult(roll, roll1, modifiers, result1, hasNat20Roll1, hasNat1Roll1);
+  }
+
+  // If there are options, determine best/worst roll
+  final bestResult = options.toUpperCase() == 'A'
+      ? max(result1, result2!)
+      : min(result1, result2!);
+  final bestRolls = options.toUpperCase() == 'A'
+      ? (result1 > result2 ? roll1 : roll2!)
+      : (result1 < result2 ? roll1 : roll2!);
+
+  final hasNat20AdvOrDis = bestRolls.contains(20);
+  final hasNat1AdvOrDis = bestRolls.contains(1);
+
+  return _formatResult(roll, roll1, modifiers, bestResult, hasNat20AdvOrDis, hasNat1AdvOrDis,
+      options.toUpperCase(), roll2);
+}
+
+//DND HELPERS
+List<(String, int)> _parseModifiers(String? modifiersMatch) {
+  final modifiers = <(String, int)>[];
   if (modifiersMatch != null) {
     final modifierRegex = RegExp(r'([+\-*/])(\d+)');
-    final modifiers = modifierRegex.allMatches(modifiersMatch);
-    for (final modifier in modifiers) {
-      final operator = modifier.group(1)!;
-      final value = int.parse(modifier.group(2)!);
-      allMods += '$operator$value';
-      switch (operator) {
-        case '+':
-          sum += value;
-          break;
-        case '-':
-          sum -= value;
-          break;
-        case '*':
-          sum *= value;
-          break;
-        case '/':
-          sum ~/= value;
-          break;
-      }
+    for (final match in modifierRegex.allMatches(modifiersMatch)) {
+      modifiers.add((match.group(1)!, int.parse(match.group(2)!)));
     }
   }
-  // Check if the list of rolls contains a 20
-  bool hasNat = (diceType == 20 && rolls.contains(20));
-  if (hasNat) {
-    return '$roll Rolled: ${rolls.toString()}$allMods = $sum with a nat 20!';
-  } else {
-  return '$roll Rolled: ${rolls.toString()}$allMods = $sum';
-  }
+  return modifiers;
 }
+
+int _applyModifiers(List<int> rolls, List<(String, int)> modifiers) {
+  var sum = rolls.reduce((value, element) => value + element);
+  for (final (operator, value) in modifiers) {
+    switch (operator) {
+      case '+':
+        sum += value;
+        break;
+      case '-':
+        sum -= value;
+        break;
+      case '*':
+        sum *= value;
+        break;
+      case '/':
+        sum ~/= value;
+        break;
+    }
+  }
+  return sum;
+}
+
+String _formatResult(String roll, List<int> rolls,
+    List<(String, int)> modifiers, int sum, bool hasNat20, bool hasNat1,
+    [String option = "", List<int>? secondRoll]) {
+
+  final modifiersString = modifiers.map((m) => "${m.$1} ${m.$2}").join(" ");
+  final optionString = option != ''
+      ? " with ${option.toLowerCase() == 'a' ? "advantage" : "disadvantage"}"
+      : "";
+  final nat20Message = hasNat20 ? ' with a nat 20!' : '';
+  final nat1Message = hasNat1 ? ' with a critical 1!' : '';
+  final secondRollString =
+      secondRoll ?? "";
+
+  return '$roll$optionString: $rolls $secondRollString $modifiersString = $sum $nat20Message$nat1Message';
+}
+
+//END DND HELPERS
 
 /// Rolls dice for a generic system (no specific rules).
 String rollNone(String roll) {
@@ -334,5 +391,6 @@ List<int> rollHelper({required int numberOfDice, required int numberOfSides}) {
     roll.add((rng.nextInt(numberOfSides) + 1));
   }
 
+  print(roll);
   return roll;
 }
