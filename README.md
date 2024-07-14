@@ -25,6 +25,20 @@ It also supports just rolling some dice with no system selected to allow for som
 > example: /roll 5d6<br>
 > output: [6,3,5,1,1]
 
+### Dungeons & Dragons (dnd)
+
+> /roll xdy - where x is the number of dice (1-999999) and d is the sides of the dice (4,6,8,12,20,100)<br>
+> optional attributes: modifiers (a,d,+,-,*,/) - these allow you to add modifiers like advantage, disadvantage, and common math operations<br>
+> 
+> example: /roll 5d6<br>
+> output: Rolled: [1, 3, 3, 5, 6] = 18
+> 
+> example: /roll 5d6 a<br>
+> output: Rolled: roll 1 [1, 3, 3, 5, 6] = 18, roll 2 [6, 6, 6, 6, 6] = 30, roll 2 is highest at 30
+>
+> example: /roll 5d6+3<br>
+> output: Rolled: roll 1 [1, 3, 3, 5, 6] = 18 + 3 = 21
+
 ### A Song of Ice and Fire RPG (asoif)
 
 > /roll xby - where x is the number of dice (1-999999) and b is the number of bonus dice (1-999999)<br>
