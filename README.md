@@ -1,5 +1,9 @@
 # Adventure Dice Roller
 
+### Install:
+Can be installed from: https://discord.com/oauth2/authorize?client_id=1228198781858877521
+
+### Intro:
 The ADR is a discord bot designed to work with multiple table-top role playing (TTRPG) systems. 
 Currently, the bot supports:
 * ASOIF RPG (https://greenronin.com/sifrp/)
