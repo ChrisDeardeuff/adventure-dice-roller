@@ -32,16 +32,16 @@ It also supports just rolling some dice with no system selected to allow for som
 > options (a,d) - allow you to specify dis/advantage which will roll the roll twice and either use the highest (a) or lowest (d) roll before applying the modifiers. 
 > 
 > example: /roll 5d6<br>
-> output: 5d6: [1, 2, 4, 3, 1] = 11 
+> output: 5d6: [1, 2, 4, 3, 1] = 11 <br>
 > 
 > example: /roll 1d20 a<br>
-> output: 1d20 with advantage: [17] [10]  = 17
+> output: 1d20 with advantage: [17] [10]  = 17<br>
 >
 > example: /roll 5d6+3<br>
-> output: 5d6+3: [6, 6, 6, 5, 2] + 3 = 28
+> output: 5d6+3: [6, 6, 6, 5, 2] + 3 = 28<br>
 >
-> example: /roll 1d20+5 d
-> output: 1d20+5 with disadvantage: [6] [9] + 5 = 11
+> example: /roll 1d20+5 d<br>
+> output: 1d20+5 with disadvantage: [6] [9] + 5 = 11<br>
 
 ### A Song of Ice and Fire RPG (asoif)
 
