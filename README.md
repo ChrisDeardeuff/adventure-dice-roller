@@ -27,17 +27,21 @@ It also supports just rolling some dice with no system selected to allow for som
 
 ### Dungeons & Dragons (dnd)
 
-> /roll xdy - where x is the number of dice (1-999999) and d is the sides of the dice (4,6,8,12,20,100)<br>
-> optional attributes: modifiers (a,d,+,-,*,/) - these allow you to add modifiers like advantage, disadvantage, and common math operations<br>
+> /roll xdy(modifier) (options) - where x is the number of dice (1-999999) and d is the sides of the dice (4,6,8,12,20,100)<br>
+> modifiers (+,-,*,/ and then a number) - these allow you to perform common math operations and can be chained (+3/2) but will be executed in order of listing, not based on order of operation.<br>
+> options (a,d) - allow you to specify dis/advantage which will roll the roll twice and either use the highest (a) or lowest (d) roll before applying the modifiers. 
 > 
 > example: /roll 5d6<br>
-> output: Rolled: [1, 3, 3, 5, 6] = 18
+> output: 5d6: [1, 2, 4, 3, 1] = 11 
 > 
-> example: /roll 5d6 a<br>
-> output: Rolled: roll 1 [1, 3, 3, 5, 6] = 18, roll 2 [6, 6, 6, 6, 6] = 30, roll 2 is highest at 30
+> example: /roll 1d20 a<br>
+> output: 1d20 with advantage: [17] [10]  = 17
 >
 > example: /roll 5d6+3<br>
-> output: Rolled: roll 1 [1, 3, 3, 5, 6] = 18 + 3 = 21
+> output: 5d6+3: [6, 6, 6, 5, 2] + 3 = 28
+>
+> example: /roll 1d20+5 d
+> output: 1d20+5 with disadvantage: [6] [9] + 5 = 11
 
 ### A Song of Ice and Fire RPG (asoif)
 
