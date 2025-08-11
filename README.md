@@ -1,21 +1,26 @@
 # Adventure Dice Roller
 
 ### Install:
+
 Can be installed from: https://discord.com/oauth2/authorize?client_id=1228198781858877521
 
 ### Intro:
-The ADR is a discord bot designed to work with multiple table-top role playing (TTRPG) systems. 
+
+The ADR is a discord bot designed to work with multiple table-top role playing (TTRPG) systems.
 Currently, the bot supports:
+
 * ASOIF RPG (https://greenronin.com/sifrp/)
 * AGE system (https://greenroninstore.com/collections/age-system)
 * DnD 5e (https://dnd.wizards.com)
 
-It also supports just rolling some dice with no system selected to allow for some flexibility. 
+It also supports just rolling some dice with no system selected to allow for some flexibility.
 
 ### Supported Commands
+
 > /help - prints this info!
 
 ### Systems
+
 > /systems - prints the available systems
 
 > /set-system - provides a selectable drop-down list of systems.
@@ -25,19 +30,23 @@ It also supports just rolling some dice with no system selected to allow for som
 ### Rolls
 
 ### No system (none)
+
 > /roll xdy - where x is the number of dice (1-999999) and y is the number of sides (1-999999)<br>
 > example: /roll 5d6<br>
 > output: [6,3,5,1,1]
 
 ### Dungeons & Dragons (dnd)
 
-> /roll xdy(modifier) (options) - where x is the number of dice (1-999999) and d is the sides of the dice (4,6,8,12,20,100)<br>
-> modifiers (+,-,*,/ and then a number) - these allow you to perform common math operations and can be chained (+3/2) but will be executed in order of listing, not based on order of operation.<br>
-> options (a,d) - allow you to specify dis/advantage which will roll the roll twice and either use the highest (a) or lowest (d) roll before applying the modifiers. 
-> 
+> /roll xdy(modifier) (options) - where x is the number of dice (1-999999) and d is the sides of the dice (
+> 4,6,8,12,20,100)<br>
+> modifiers (+,-,*,/ and then a number) - these allow you to perform common math operations and can be chained (+3/2)
+> but will be executed in order of listing, not based on order of operation.<br>
+> options (a,d) - allow you to specify dis/advantage which will roll the roll twice and either use the highest (a) or
+> lowest (d) roll before applying the modifiers.
+>
 > example: /roll 5d6<br>
 > output: 5d6: [1, 2, 4, 3, 1] = 11 <br>
-> 
+>
 > example: /roll 1d20 a<br>
 > output: 1d20 with advantage: [17] [10]  = 17<br>
 >
@@ -55,13 +64,15 @@ It also supports just rolling some dice with no system selected to allow for som
 
 ### Advanced Game Engine (age)
 
-> /roll x - where x is the modifier (0-9) you want added to your roll. This roll will also check for doubles and calculate stunt points <br>
+> /roll x - where x is the modifier (0-9) you want added to your roll. This roll will also check for doubles and
+> calculate stunt points <br>
 > example: /roll 4<br>
 > output: Rolled: [4, 1, 4] + 4 = 13 and generated 4 stunt points!
 
 ### Quick Rolls
 
-> /set-qr num roll -where num is the number 1-10 you want to save the roll to (roll must be valid for current system)<br>
+> /set-qr num roll -where num is the number 1-10 you want to save the roll to (roll must be valid for current
+> system)<br>
 > example: /set-qr 1 5b6
 > output: quick roll 1, set to 5b6
 

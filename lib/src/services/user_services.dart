@@ -6,7 +6,6 @@ import 'package:nyxx/nyxx.dart' as nyxx;
 import '../models/user.dart';
 
 class UserServices {
-
   static const supabaseUrl = 'https://paxcmehxsyyhzspxbdtm.supabase.co';
   static final supabaseKey = Platform.environment['SUPABASE_KEY'];
 
@@ -28,11 +27,9 @@ class UserServices {
 
   supaInit() async {
     try {
-
       _logger.info('Connecting to database');
 
       supabase.from('user_preferences').select();
-
     } catch (e) {
       _logger.severe('Database connection Failed $e');
       return;
@@ -48,7 +45,10 @@ class UserServices {
       // collection.update(where.eq('id', user.id.toString()),
       //     modify.set('selectedSystem', user.selectedSystem.name));
 
-      await supabase.from('user_preferences').update({'selectedSystem': user.selectedSystem.name}).eq('id', user.id.toString());
+      await supabase
+          .from('user_preferences')
+          .update({'selectedSystem': user.selectedSystem.name}).eq(
+              'id', user.id.toString());
       _logger.info('System updated for: ${user.id.toString()}');
     } catch (e) {
       _logger.severe('Error updating system: $e');
@@ -56,14 +56,16 @@ class UserServices {
   }
 
   Future<ADRUser> registerUser(nyxx.Snowflake id) async {
+    final getUser = await supabase
+        .from('user_preferences')
+        .select('id, selectedSystem, quickRolls')
+        .eq('id', id);
 
-    final getUser =  await supabase.from('user_preferences').select('id, selectedSystem, quickRolls').eq('id', id);
-
-    if(getUser.isEmpty){
+    if (getUser.isEmpty) {
       _logger.info("Creating new user");
       var newUser = await newUserSetup(id);
       return newUser;
-    }else{
+    } else {
       _logger.info("Found User: ${getUser.first}");
       return ADRUser.fromJson(getUser.first);
     }
@@ -76,7 +78,11 @@ class UserServices {
     //try to put user in db
     try {
       var userJson = newUser.toJson();
-      await supabase.from('user_preferences').insert({'id': id.toString(), 'selectedSystem': newUser.selectedSystem.toString(), 'quickRolls': userJson['quickRolls'] });
+      await supabase.from('user_preferences').insert({
+        'id': id.toString(),
+        'selectedSystem': newUser.selectedSystem.toString(),
+        'quickRolls': userJson['quickRolls']
+      });
     } catch (e) {
       _logger.severe("error creating user: $e");
     }
@@ -97,7 +103,10 @@ class UserServices {
           (element) => element.selectedSystem == user.selectedSystem);
       user.quickRolls[qrIndex].setQuickRoll(index, roll);
 
-      await supabase.from('user_preferences').update({'quickRolls': jsonEncode(user.quickRolls)}).eq('id', user.id.toString());
+      await supabase
+          .from('user_preferences')
+          .update({'quickRolls': jsonEncode(user.quickRolls)}).eq(
+              'id', user.id.toString());
 
       _logger.info('quick roll $index updated for: ${user.id.toString()}');
     } catch (e) {
