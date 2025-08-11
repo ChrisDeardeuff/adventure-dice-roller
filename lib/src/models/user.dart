@@ -9,7 +9,7 @@ import 'systems.dart';
 part 'user.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class User {
+class ADRUser {
   System selectedSystem = System.none;
 
   @SnowflakeJsonConverter()
@@ -18,7 +18,7 @@ class User {
   @ListOfQuickRollsConverter()
   List<QuickRoll> quickRolls = [];
 
-  User(this.id) {
+  ADRUser(this.id) {
     for (var system in System.values) {
       quickRolls.add(QuickRoll(system));
     }
@@ -27,10 +27,10 @@ class User {
   /// A necessary factory constructor for creating a new User instance
   /// from a map. Pass the map to the generated `_$UserFromJson()` constructor.
   /// The constructor is named after the source class, in this case, User.
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+  factory ADRUser.fromJson(Map<String, dynamic> json) => _$ADRUserFromJson(json);
 
   /// `toJson` is the convention for a class to declare support for serialization
   /// to JSON. The implementation simply calls the private, generated
   /// helper method `_$UserToJson`.
-  Map<String, dynamic> toJson() => _$UserToJson(this);
+  Map<String, dynamic> toJson() => _$ADRUserToJson(this);
 }

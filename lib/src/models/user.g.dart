@@ -6,14 +6,14 @@ part of 'user.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-User _$UserFromJson(Map<String, dynamic> json) => User(
-      const SnowflakeJsonConverter().fromJson(json['id'] as String),
+ADRUser _$ADRUserFromJson(Map<String, dynamic> json) => ADRUser(
+      const SnowflakeJsonConverter().fromJson(json['id'].toString()),
     )
       ..selectedSystem = $enumDecode(_$SystemEnumMap, json['selectedSystem'])
       ..quickRolls = const ListOfQuickRollsConverter()
           .fromJson(json['quickRolls'] as String);
 
-Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
+Map<String, dynamic> _$ADRUserToJson(ADRUser instance) => <String, dynamic>{
       'selectedSystem': _$SystemEnumMap[instance.selectedSystem]!,
       'id': const SnowflakeJsonConverter().toJson(instance.id),
       'quickRolls':

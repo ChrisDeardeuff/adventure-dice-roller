@@ -7,7 +7,7 @@ import 'package:nyxx_commands/nyxx_commands.dart';
 
 void main() async {
   UserServices us = UserServices();
-  us.mongoInit();
+  us.supaInit();
 
   //load env variables
   final apiToken = Platform.environment['API_TOKEN'];

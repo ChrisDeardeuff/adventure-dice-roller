@@ -1,15 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:supabase/supabase.dart';
 import 'package:nyxx/nyxx.dart' as nyxx;
 
 import '../models/user.dart';
 
 class UserServices {
+
+  static const supabaseUrl = 'https://paxcmehxsyyhzspxbdtm.supabase.co';
+  static final supabaseKey = Platform.environment['SUPABASE_KEY'];
+
   final nyxx.Logger _logger = nyxx.Logger('ADR.user_service');
 
   static final UserServices _singleton = UserServices._internal();
+  final supabase = SupabaseClient(
+    supabaseUrl,
+    supabaseKey!,
+  );
 
   factory UserServices() {
     return _singleton;
@@ -17,16 +24,15 @@ class UserServices {
 
   UserServices._internal();
 
-  late Db db;
+  var users = <nyxx.Snowflake, ADRUser>{};
 
-  var users = <nyxx.Snowflake, User>{};
-
-  mongoInit() async {
+  supaInit() async {
     try {
+
       _logger.info('Connecting to database');
-      db = await Db.create(
-          'mongodb://${Platform.environment['DB_USER']}:${Platform.environment['DB_PASS']}@${Platform.environment['DB_IP']}:27017/user_preferences');
-      await db.open();
+
+      supabase.from('user_preferences').select();
+
     } catch (e) {
       _logger.severe('Database connection Failed $e');
       return;
@@ -35,46 +41,42 @@ class UserServices {
     _logger.info('Connected to database');
   }
 
-  userSetSystem(User user) {
+  userSetSystem(ADRUser user) async {
     try {
-      var collection = db.collection('user_preferences');
+      // var collection = db.collection('user_preferences');
+      //
+      // collection.update(where.eq('id', user.id.toString()),
+      //     modify.set('selectedSystem', user.selectedSystem.name));
 
-      collection.update(where.eq('id', user.id.toString()),
-          modify.set('selectedSystem', user.selectedSystem.name));
+      await supabase.from('user_preferences').update({'selectedSystem': user.selectedSystem.name}).eq('id', user.id.toString());
       _logger.info('System updated for: ${user.id.toString()}');
     } catch (e) {
       _logger.severe('Error updating system: $e');
     }
   }
 
-  Future<User> registerUser(nyxx.Snowflake id) async {
-    var collection = db.collection('user_preferences');
-    _logger.info(id.value.toString());
+  Future<ADRUser> registerUser(nyxx.Snowflake id) async {
 
-    var userSearch =
-        await collection.findOne(where.eq('id', id.value.toString()));
-    _logger.info(userSearch);
-    // Check if the result is null
-    if (userSearch == null) {
+    final getUser =  await supabase.from('user_preferences').select('id, selectedSystem, quickRolls').eq('id', id);
+
+    if(getUser.isEmpty){
       _logger.info("Creating new user");
       var newUser = await newUserSetup(id);
-
       return newUser;
-    } else {
-      _logger.info("got user: $userSearch");
-      return User.fromJson(userSearch);
+    }else{
+      _logger.info("Found User: ${getUser.first}");
+      return ADRUser.fromJson(getUser.first);
     }
   }
 
-  Future<User> newUserSetup(nyxx.Snowflake id) async {
-    //create a new preferences document
-    User newUser = User(id);
+  Future<ADRUser> newUserSetup(nyxx.Snowflake id) async {
+    // //create a new preferences document
+    ADRUser newUser = ADRUser(id);
 
     //try to put user in db
     try {
-      var userCollection = db.collection('user_preferences');
-
-      await userCollection.insertOne(newUser.toJson());
+      var userJson = newUser.toJson();
+      await supabase.from('user_preferences').insert({'id': id.toString(), 'selectedSystem': newUser.selectedSystem.toString(), 'quickRolls': userJson['quickRolls'] });
     } catch (e) {
       _logger.severe("error creating user: $e");
     }
@@ -86,7 +88,7 @@ class UserServices {
   ///index = quick roll number in the system (1-10)
   ///roll = valid roll for the selected system
   ///user = current user of the bot
-  setQuickRoll(int index, String roll, User user) async {
+  setQuickRoll(int index, String roll, ADRUser user) async {
     try {
       _logger.info("setting quick roll");
       _logger.info(jsonEncode(user));
@@ -94,11 +96,9 @@ class UserServices {
       var qrIndex = user.quickRolls.indexWhere(
           (element) => element.selectedSystem == user.selectedSystem);
       user.quickRolls[qrIndex].setQuickRoll(index, roll);
-      //get the collection of documents
-      var collection = db.collection('user_preferences');
-      //get the document corresponding to current user and update the quickRolls
-      collection.update(where.eq('id', user.id.toString()),
-          modify.set('quickRolls', jsonEncode(user.quickRolls)));
+
+      await supabase.from('user_preferences').update({'quickRolls': jsonEncode(user.quickRolls)}).eq('id', user.id.toString());
+
       _logger.info('quick roll $index updated for: ${user.id.toString()}');
     } catch (e) {
       _logger.severe('Error updating quick rolls: $e');
