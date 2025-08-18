@@ -25,7 +25,7 @@ class ListOfQuickRollsConverter extends JsonConverter<List<QuickRoll>, String> {
           (entry['savedQuickRolls'] as List<dynamic>).cast<String>();
       lqr.add(newQR);
     }
-
+    logger.info('finished decoding QR..');
     return lqr;
   }
 

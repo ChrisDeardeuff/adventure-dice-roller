@@ -17,8 +17,8 @@ Map<String, dynamic> _$SFScoresToJson(SFScores instance) => <String, dynamic>{
 
 const _$DiceEnumMap = {
   Dice.d4: 0,
-  Dice.d8: 1,
-  Dice.d10: 2,
-  Dice.d12: 3,
-  Dice.d20: 4,
+  Dice.d6: 1,
+  Dice.d8: 2,
+  Dice.d10: 3,
+  Dice.d12: 4,
 };

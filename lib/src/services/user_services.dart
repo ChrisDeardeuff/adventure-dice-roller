@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:supabase/supabase.dart';
 import 'package:nyxx/nyxx.dart' as nyxx;
 
+import '../models/sf_scores.dart';
 import '../models/user.dart';
 
 class UserServices {
@@ -58,7 +59,7 @@ class UserServices {
   Future<ADRUser> registerUser(nyxx.Snowflake id) async {
     final getUser = await supabase
         .from('user_preferences')
-        .select('id, selectedSystem, quickRolls')
+        .select('id, selectedSystem, quickRolls, stillfleetScores')
         .eq('id', id);
 
     if (getUser.isEmpty) {
@@ -81,7 +82,8 @@ class UserServices {
       await supabase.from('user_preferences').insert({
         'id': id.toString(),
         'selectedSystem': newUser.selectedSystem.toString(),
-        'quickRolls': userJson['quickRolls']
+        'quickRolls': userJson['quickRolls'],
+        'stillfleetScores': userJson['stillfleetScores']
       });
     } catch (e) {
       _logger.severe("error creating user: $e");
@@ -111,6 +113,30 @@ class UserServices {
       _logger.info('quick roll $index updated for: ${user.id.toString()}');
     } catch (e) {
       _logger.severe('Error updating quick rolls: $e');
+    }
+  }
+
+  setSFScores(
+      Dice CHA, Dice COM, Dice REA, Dice MOV, Dice WIL, ADRUser user) async {
+    try {
+      _logger.info("setting Stillfleet Scores");
+
+      user.stillfleetScores.scores.addAll({
+        'CHA': CHA,
+        'COM': COM,
+        'REA': REA,
+        'MOV': MOV,
+        'WIL': WIL,
+      });
+
+      await supabase
+          .from('user_preferences')
+          .update({'stillfleetScores': jsonEncode(user.stillfleetScores)}).eq(
+              'id', user.id.toString());
+
+      _logger.info('scores updated for: ${user.id.toString()}');
+    } catch (e) {
+      _logger.severe('Error updating SF Scores: $e');
     }
   }
 }

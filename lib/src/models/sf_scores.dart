@@ -24,11 +24,11 @@ enum Dice {
   @JsonValue(0)
   d4,
   @JsonValue(1)
-  d8,
+  d6,
   @JsonValue(2)
-  d10,
+  d8,
   @JsonValue(3)
-  d12,
+  d10,
   @JsonValue(4)
-  d20
+  d12
 }
