@@ -7,7 +7,7 @@ part of 'user.dart';
 // **************************************************************************
 
 ADRUser _$ADRUserFromJson(Map<String, dynamic> json) => ADRUser(
-      const SnowflakeJsonConverter().fromJson(json['id'].toString()),
+      const SnowflakeJsonConverter().fromJson(json['id'] as String),
     )
       ..selectedSystem = $enumDecode(_$SystemEnumMap, json['selectedSystem'])
       ..quickRolls = const ListOfQuickRollsConverter()
@@ -25,4 +25,5 @@ const _$SystemEnumMap = {
   System.asoif: 'asoif',
   System.age: 'age',
   System.dnd: 'dnd',
+  System.sf: 'sf',
 };

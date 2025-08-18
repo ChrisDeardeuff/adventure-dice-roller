@@ -43,6 +43,8 @@ final setSystem = ChatCommand(
             user.selectedSystem = System.age;
           case "dnd":
             user.selectedSystem = System.dnd;
+          case "sf":
+            user.selectedSystem = System.sf;
         }
 
         us.userSetSystem(user);

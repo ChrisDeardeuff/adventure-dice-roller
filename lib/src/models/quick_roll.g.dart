@@ -22,4 +22,5 @@ const _$SystemEnumMap = {
   System.asoif: 'asoif',
   System.age: 'age',
   System.dnd: 'dnd',
+  System.sf: 'sf',
 };

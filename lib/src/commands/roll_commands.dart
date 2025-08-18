@@ -68,6 +68,8 @@ final roll = ChatCommand(
           await context
               .respond(MessageBuilder(content: rollDnd(roll, options)));
           return;
+        case System.sf:
+          // TODO: Handle this case.
       }
     },
   ),
@@ -193,6 +195,8 @@ final qr = ChatCommand(
         case System.dnd:
           await context.respond(MessageBuilder(content: rollDnd(roll, '')));
           return;
+        case System.sf:
+          // TODO: Handle this case.
       }
     },
   ),
@@ -228,6 +232,9 @@ bool isValidRoll(System system, String roll) {
         return true;
       }
       return false;
+    case System.sf:
+      return false;
+      // TODO: Handle this case.
   }
 }
 
