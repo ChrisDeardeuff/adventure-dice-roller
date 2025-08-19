@@ -10,16 +10,15 @@ ADRUser _$ADRUserFromJson(Map<String, dynamic> json) => ADRUser(
       _snowflakeFromJson(json['id']),
     )
       ..selectedSystem = $enumDecode(_$SystemEnumMap, json['selectedSystem'])
-      ..quickRolls = const ListOfQuickRollsConverter()
-          .fromJson(json['quickRolls'] as String)
-      ..stillfleetScores =
-          SFScores.fromJson(json['stillfleetScores'] as Map<String, dynamic>);
+      ..quickRolls = (json['quickRolls'] as List<dynamic>)
+          .map((e) => QuickRoll.fromJson(e as Map<String, dynamic>))
+          .toList()
+      ..stillfleetScores = _sfScoresFromJson(json['stillfleetScores']);
 
 Map<String, dynamic> _$ADRUserToJson(ADRUser instance) => <String, dynamic>{
       'selectedSystem': _$SystemEnumMap[instance.selectedSystem]!,
       'id': _snowflakeToJson(instance.id),
-      'quickRolls':
-          const ListOfQuickRollsConverter().toJson(instance.quickRolls),
+      'quickRolls': instance.quickRolls.map((e) => e.toJson()).toList(),
       'stillfleetScores': instance.stillfleetScores.toJson(),
     };
 

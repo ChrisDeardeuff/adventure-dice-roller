@@ -1,4 +1,5 @@
-import 'package:adventure_dice_roller/src/converters/list_qr_converter.dart';
+import 'dart:convert';
+
 import 'package:adventure_dice_roller/src/models/quick_roll.dart';
 import 'package:adventure_dice_roller/src/converters/snowflake_json_converter.dart';
 import 'package:adventure_dice_roller/src/models/sf_scores.dart';
@@ -16,9 +17,9 @@ class ADRUser {
   @JsonKey(fromJson: _snowflakeFromJson, toJson: _snowflakeToJson)
   Snowflake id;
 
-  @ListOfQuickRollsConverter()
   List<QuickRoll> quickRolls = [];
 
+  @JsonKey(fromJson: _sfScoresFromJson)
   SFScores stillfleetScores = SFScores();
 
   ADRUser(this.id) {
@@ -46,4 +47,11 @@ Snowflake _snowflakeFromJson(Object? json) {
 
 String _snowflakeToJson(Snowflake value) {
   return const SnowflakeJsonConverter().toJson(value);
+}
+
+SFScores _sfScoresFromJson(json) {
+  if (json is String) {
+    return SFScores.fromJson(jsonDecode(json) as Map<String, dynamic>);
+  }
+  return SFScores.fromJson(json as Map<String, dynamic>);
 }
