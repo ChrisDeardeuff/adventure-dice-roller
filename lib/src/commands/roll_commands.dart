@@ -255,12 +255,16 @@ bool isValidRoll(System system, String roll) {
       }
       return false;
     case System.sf:
-      roll = roll.substring(0, 3).toUpperCase();
+      var rollCheck = roll.substring(0, 3).toUpperCase();
       List<String> scores = ["CHA", "COM", "MOV", "REA", "WIL"];
-      if (scores.contains(roll)) {
+      if (scores.contains(rollCheck)) {
         return true;
       } else {
-        return false;
+        if (rollPattern.hasMatch(roll)) {
+          return true;
+        } else {
+          return false;
+        }
       }
   }
 }
@@ -334,7 +338,12 @@ String rollDnd(String roll, String options) {
 
   if (options.isEmpty) {
     return _formatResult(
-        roll, roll1, modifiers, result1, hasNat20Roll1, hasNat1Roll1);
+        roll: roll,
+        rolls: roll1,
+        modifiers: modifiers,
+        sum: result1,
+        hasNat20: hasNat20Roll1,
+        hasNat1: hasNat1Roll1);
   }
 
   // If there are options, determine best/worst roll
@@ -348,8 +357,15 @@ String rollDnd(String roll, String options) {
   final hasNat20AdvOrDis = bestRolls.contains(20);
   final hasNat1AdvOrDis = bestRolls.contains(1);
 
-  return _formatResult(roll, roll1, modifiers, bestResult, hasNat20AdvOrDis,
-      hasNat1AdvOrDis, options.toUpperCase(), roll2);
+  return _formatResult(
+      roll: roll,
+      rolls: roll1,
+      modifiers: modifiers,
+      sum: bestResult,
+      hasNat20: hasNat20AdvOrDis,
+      hasNat1: hasNat1AdvOrDis,
+      option: options.toUpperCase(),
+      secondRoll: roll2);
 }
 
 //DND/Stillfleet HELPERS
@@ -385,9 +401,16 @@ int _applyModifiers(List<int> rolls, List<(String, int)> modifiers) {
   return sum;
 }
 
-String _formatResult(String roll, List<int> rolls,
-    List<(String, int)> modifiers, int sum, bool hasNat20, bool hasNat1,
-    [String option = "", List<int>? secondRoll]) {
+String _formatResult(
+    {required String roll,
+    required List<int> rolls,
+    required List<(String, int)> modifiers,
+    required int sum,
+    required bool hasNat20,
+    required bool hasNat1,
+    int? diceType,
+    String option = "",
+    List<int>? secondRoll}) {
   final modifiersString = modifiers.map((m) => "${m.$1} ${m.$2}").join(" ");
   final optionString = option != ''
       ? " with ${option.toLowerCase() == 'a' ? "advantage" : "disadvantage"}"
@@ -396,7 +419,11 @@ String _formatResult(String roll, List<int> rolls,
   final nat1Message = hasNat1 ? ' with a critical 1!' : '';
   final secondRollString = secondRoll ?? "";
 
-  return '$roll$optionString: $rolls $secondRollString $modifiersString = $sum $nat20Message$nat1Message';
+  if (diceType != null) {
+    return '$roll$optionString - d$diceType: $rolls $secondRollString $modifiersString = $sum $nat20Message$nat1Message';
+  } else {
+    return '$roll$optionString : $rolls $secondRollString $modifiersString = $sum $nat20Message$nat1Message';
+  }
 }
 
 //END DND HELPERS
@@ -430,6 +457,14 @@ List<int> rollHelper({required int numberOfDice, required int numberOfSides}) {
 
 //rolls dice for Stillfleet
 String rollSF(String roll, ADRUser user, String options) {
+  var testRoll = roll.substring(0, 3).toUpperCase();
+  List<String> scores = ["CHA", "COM", "MOV", "REA", "WIL"];
+  if(!scores.contains(testRoll)){
+    //normal dice roll
+    return rollNone(roll);
+  }
+
+  //a skill specific roll
   Dice? die = user.stillfleetScores.scores[roll.substring(0, 3)];
 
   _logger.info(die);
@@ -458,7 +493,13 @@ String rollSF(String roll, ADRUser user, String options) {
 
   if (options.isEmpty) {
     return _formatResult(
-        roll, roll1, modifiers, result1, hasNat20Roll1, hasNat1Roll1);
+        roll: roll,
+        rolls: roll1,
+        modifiers: modifiers,
+        sum: result1,
+        hasNat20: hasNat20Roll1,
+        hasNat1: hasNat1Roll1,
+        diceType: diceType);
   }
 
   // If there are options, determine best/worst roll
@@ -472,6 +513,14 @@ String rollSF(String roll, ADRUser user, String options) {
   final hasNat20AdvOrDis = bestRolls.contains(int.parse(die.name.substring(1)));
   final hasNat1AdvOrDis = bestRolls.contains(1);
 
-  return _formatResult(roll, roll1, modifiers, bestResult, hasNat20AdvOrDis,
-      hasNat1AdvOrDis, options.toUpperCase(), roll2);
+  return _formatResult(
+      roll: roll,
+      rolls: roll1,
+      modifiers: modifiers,
+      sum: bestResult,
+      hasNat20: hasNat20AdvOrDis,
+      hasNat1: hasNat1AdvOrDis,
+      option: options.toUpperCase(),
+      secondRoll: roll2,
+      diceType: diceType);
 }
