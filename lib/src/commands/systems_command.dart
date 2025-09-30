@@ -60,7 +60,7 @@ final setSystem = ChatCommand(
           await context.respond(
               MessageBuilder(content: "System Set to $selection!"),
               level: hiddenMessage);
-        }catch(e){
+        } catch (e) {
           _logger.info("error setting system: $e");
         }
       },

@@ -32,7 +32,8 @@ final setSFS = ChatCommand(
       }
 
       try {
-        _logger.info("Parsing: CHA - $CHA, COM - $COM, REA - $REA, MOV - $MOV, WIL - $WIL");
+        _logger.info(
+            "Parsing: CHA - $CHA, COM - $COM, REA - $REA, MOV - $MOV, WIL - $WIL");
         _logger.info(Dice.d4.name);
         Dice cha = Dice.values.firstWhere((e) => e.name == CHA);
         Dice com = Dice.values.firstWhere((e) => e.name == COM);
@@ -42,15 +43,14 @@ final setSFS = ChatCommand(
 
         var user = await us.registerUser(context.user.id);
 
-        us.setSFScores(cha,com,rea,mov,wil,user);
-
-      }catch(e){
+        us.setSFScores(cha, com, rea, mov, wil, user);
+      } catch (e) {
         _logger.info("Error setting scores: $e");
         await context.respond(MessageBuilder(
-            content: "Error setting scores. Make sure all fields are in dx format (where x is 4, 6, 8, 10, or 12"));
+            content:
+                "Error setting scores. Make sure all fields are in dx format (where x is 4, 6, 8, 10, or 12"));
         return;
       }
-
 
       await context.respond(MessageBuilder(
           content:

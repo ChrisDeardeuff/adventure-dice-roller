@@ -459,7 +459,7 @@ List<int> rollHelper({required int numberOfDice, required int numberOfSides}) {
 String rollSF(String roll, ADRUser user, String options) {
   var testRoll = roll.substring(0, 3).toUpperCase();
   List<String> scores = ["CHA", "COM", "MOV", "REA", "WIL"];
-  if(!scores.contains(testRoll)){
+  if (!scores.contains(testRoll)) {
     //normal dice roll
     return rollNone(roll);
   }
