@@ -18,8 +18,8 @@ class SFScores {
       _$SFScoresFromJson(json);
 
   Map<String, dynamic> toJson() => _$SFScoresToJson(this);
-
 }
+
 enum Dice {
   @JsonValue(0)
   d4,
