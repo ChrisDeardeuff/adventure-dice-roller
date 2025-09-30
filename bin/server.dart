@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:adventure_dice_roller/server.dart';
 import 'package:adventure_dice_roller/src/commands/asoif_commands.dart';
+import 'package:adventure_dice_roller/src/commands/sf_commands.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 
@@ -24,6 +25,7 @@ void main() async {
   commands.addCommand(setQr);
   commands.addCommand(qr);
   commands.addCommand(help);
+  commands.addCommand(setSFS);
 
   //create the client with connection info
   final client = await Nyxx.connectGateway(

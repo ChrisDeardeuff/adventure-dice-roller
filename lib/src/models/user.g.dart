@@ -7,17 +7,19 @@ part of 'user.dart';
 // **************************************************************************
 
 ADRUser _$ADRUserFromJson(Map<String, dynamic> json) => ADRUser(
-      const SnowflakeJsonConverter().fromJson(json['id'].toString()),
+      _snowflakeFromJson(json['id']),
     )
       ..selectedSystem = $enumDecode(_$SystemEnumMap, json['selectedSystem'])
-      ..quickRolls = const ListOfQuickRollsConverter()
-          .fromJson(json['quickRolls'] as String);
+      ..quickRolls = (json['quickRolls'] as List<dynamic>)
+          .map((e) => QuickRoll.fromJson(e as Map<String, dynamic>))
+          .toList()
+      ..stillfleetScores = _sfScoresFromJson(json['stillfleetScores']);
 
 Map<String, dynamic> _$ADRUserToJson(ADRUser instance) => <String, dynamic>{
       'selectedSystem': _$SystemEnumMap[instance.selectedSystem]!,
-      'id': const SnowflakeJsonConverter().toJson(instance.id),
-      'quickRolls':
-          const ListOfQuickRollsConverter().toJson(instance.quickRolls),
+      'id': _snowflakeToJson(instance.id),
+      'quickRolls': instance.quickRolls.map((e) => e.toJson()).toList(),
+      'stillfleetScores': instance.stillfleetScores.toJson(),
     };
 
 const _$SystemEnumMap = {
@@ -25,4 +27,5 @@ const _$SystemEnumMap = {
   System.asoif: 'asoif',
   System.age: 'age',
   System.dnd: 'dnd',
+  System.sf: 'sf',
 };

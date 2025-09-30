@@ -41,7 +41,7 @@ final help = ChatCommand(
   id(
     'help',
     (ChatContext context) async {
-      String response = await readMarkdownFile("README.md");
+      String response = await readMarkdownFile("help.md");
       await context.respond(MessageBuilder(content: response),
           level: hiddenMessage);
     },

@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:adventure_dice_roller/server.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
+import '../models/sf_scores.dart';
+import '../models/user.dart';
 import '../services/user_services.dart';
 import '../models/systems.dart';
 
@@ -41,12 +43,21 @@ final roll = ChatCommand(
 
       /// 2. Validate if the roll input is correct for the chosen system.
       if (roll == null || !isValidRoll(system, roll)) {
-        await context.respond(
-            MessageBuilder(
-                content:
-                    'Invalid input for the current selected system: ${system.name}. '
-                    'Please refer to /help or the online documentation for the proper formatting'),
-            level: hiddenMessage);
+        if (system.name != 'sf') {
+          await context.respond(
+              MessageBuilder(
+                  content:
+                      'roll = $roll - is an invalid roll for system: ${system.name} '
+                      'or roll parameter is empty, please try again or use /help for help.'),
+              level: hiddenMessage);
+        } else {
+          await context.respond(
+              MessageBuilder(
+                  content:
+                      'roll = $roll - is an invalid roll for system: ${system.name} '
+                      'Make sure to set your scores with /set-stillfleet-scores'),
+              level: hiddenMessage);
+        }
         return;
       }
 
@@ -68,6 +79,10 @@ final roll = ChatCommand(
           await context
               .respond(MessageBuilder(content: rollDnd(roll, options)));
           return;
+        case System.sf:
+          var user = await us.registerUser(context.user.id);
+          await context
+              .respond(MessageBuilder(content: rollSF(roll, user, options)));
       }
     },
   ),
@@ -120,12 +135,21 @@ final setQr = ChatCommand(
         }
       } else {
         _logger.severe("Invalid Roll or Roll is Null");
-        await context.respond(
-            MessageBuilder(
-                content:
-                    'roll = $roll - is an invalid roll for system: ${system.name} '
-                    'or roll parameter is empty, please try again or use /help for help'),
-            level: hiddenMessage);
+        if (system.name != 'sf') {
+          await context.respond(
+              MessageBuilder(
+                  content:
+                      'roll = $roll - is an invalid roll for system: ${system.name} '
+                      'or roll parameter is empty, please try again or use /help for help.'),
+              level: hiddenMessage);
+        } else {
+          await context.respond(
+              MessageBuilder(
+                  content:
+                      'roll = $roll - is an invalid roll for system: ${system.name} '
+                      'Make sure to set your scores with /set-stillfleet-scores'),
+              level: hiddenMessage);
+        }
         return;
       }
 
@@ -193,6 +217,8 @@ final qr = ChatCommand(
         case System.dnd:
           await context.respond(MessageBuilder(content: rollDnd(roll, '')));
           return;
+        case System.sf:
+        // TODO: Handle this case.
       }
     },
   ),
@@ -228,6 +254,18 @@ bool isValidRoll(System system, String roll) {
         return true;
       }
       return false;
+    case System.sf:
+      var rollCheck = roll.substring(0, 3).toUpperCase();
+      List<String> scores = ["CHA", "COM", "MOV", "REA", "WIL"];
+      if (scores.contains(rollCheck)) {
+        return true;
+      } else {
+        if (rollPattern.hasMatch(roll)) {
+          return true;
+        } else {
+          return false;
+        }
+      }
   }
 }
 
@@ -300,7 +338,12 @@ String rollDnd(String roll, String options) {
 
   if (options.isEmpty) {
     return _formatResult(
-        roll, roll1, modifiers, result1, hasNat20Roll1, hasNat1Roll1);
+        roll: roll,
+        rolls: roll1,
+        modifiers: modifiers,
+        sum: result1,
+        hasNat20: hasNat20Roll1,
+        hasNat1: hasNat1Roll1);
   }
 
   // If there are options, determine best/worst roll
@@ -314,11 +357,18 @@ String rollDnd(String roll, String options) {
   final hasNat20AdvOrDis = bestRolls.contains(20);
   final hasNat1AdvOrDis = bestRolls.contains(1);
 
-  return _formatResult(roll, roll1, modifiers, bestResult, hasNat20AdvOrDis,
-      hasNat1AdvOrDis, options.toUpperCase(), roll2);
+  return _formatResult(
+      roll: roll,
+      rolls: roll1,
+      modifiers: modifiers,
+      sum: bestResult,
+      hasNat20: hasNat20AdvOrDis,
+      hasNat1: hasNat1AdvOrDis,
+      option: options.toUpperCase(),
+      secondRoll: roll2);
 }
 
-//DND HELPERS
+//DND/Stillfleet HELPERS
 List<(String, int)> _parseModifiers(String? modifiersMatch) {
   final modifiers = <(String, int)>[];
   if (modifiersMatch != null) {
@@ -351,18 +401,29 @@ int _applyModifiers(List<int> rolls, List<(String, int)> modifiers) {
   return sum;
 }
 
-String _formatResult(String roll, List<int> rolls,
-    List<(String, int)> modifiers, int sum, bool hasNat20, bool hasNat1,
-    [String option = "", List<int>? secondRoll]) {
+String _formatResult(
+    {required String roll,
+    required List<int> rolls,
+    required List<(String, int)> modifiers,
+    required int sum,
+    required bool hasNat20,
+    required bool hasNat1,
+    int? diceType,
+    String option = "",
+    List<int>? secondRoll}) {
   final modifiersString = modifiers.map((m) => "${m.$1} ${m.$2}").join(" ");
   final optionString = option != ''
       ? " with ${option.toLowerCase() == 'a' ? "advantage" : "disadvantage"}"
       : "";
-  final nat20Message = hasNat20 ? ' with a nat 20!' : '';
+  final nat20Message = hasNat20 ? ' a max roll!' : '';
   final nat1Message = hasNat1 ? ' with a critical 1!' : '';
   final secondRollString = secondRoll ?? "";
 
-  return '$roll$optionString: $rolls $secondRollString $modifiersString = $sum $nat20Message$nat1Message';
+  if (diceType != null) {
+    return '$roll$optionString - d$diceType: $rolls $secondRollString $modifiersString = $sum $nat20Message$nat1Message';
+  } else {
+    return '$roll$optionString : $rolls $secondRollString $modifiersString = $sum $nat20Message$nat1Message';
+  }
 }
 
 //END DND HELPERS
@@ -392,4 +453,74 @@ List<int> rollHelper({required int numberOfDice, required int numberOfSides}) {
 
   print(roll);
   return roll;
+}
+
+//rolls dice for Stillfleet
+String rollSF(String roll, ADRUser user, String options) {
+  var testRoll = roll.substring(0, 3).toUpperCase();
+  List<String> scores = ["CHA", "COM", "MOV", "REA", "WIL"];
+  if(!scores.contains(testRoll)){
+    //normal dice roll
+    return rollNone(roll);
+  }
+
+  //a skill specific roll
+  Dice? die = user.stillfleetScores.scores[roll.substring(0, 3)];
+
+  _logger.info(die);
+
+  List<(String, int)> modifiers;
+
+  var mods = roll.substring(3);
+  modifiers = _parseModifiers(mods);
+
+  final diceCount = 1;
+  _logger.info(die!.name.substring(1));
+  final diceType = int.parse(die.name.substring(1));
+
+  // Roll dice twice if advantage or disadvantage is specified
+  final roll1 = rollHelper(numberOfDice: diceCount, numberOfSides: diceType);
+  final roll2 = options != ''
+      ? rollHelper(numberOfDice: diceCount, numberOfSides: diceType)
+      : null;
+
+  final result1 = _applyModifiers(roll1, modifiers);
+  final result2 = roll2 != null ? _applyModifiers(roll2, modifiers) : null;
+
+  final hasNat20Roll1 = roll1.contains(
+      int.parse(die.name.substring(1))); // Check for a max in the first roll
+  final hasNat1Roll1 = roll1.contains(1); // Check for a 1 in the first roll
+
+  if (options.isEmpty) {
+    return _formatResult(
+        roll: roll,
+        rolls: roll1,
+        modifiers: modifiers,
+        sum: result1,
+        hasNat20: hasNat20Roll1,
+        hasNat1: hasNat1Roll1,
+        diceType: diceType);
+  }
+
+  // If there are options, determine best/worst roll
+  final bestResult = options.toUpperCase() == 'A'
+      ? max(result1, result2!)
+      : min(result1, result2!);
+  final bestRolls = options.toUpperCase() == 'A'
+      ? (result1 > result2 ? roll1 : roll2!)
+      : (result1 < result2 ? roll1 : roll2!);
+
+  final hasNat20AdvOrDis = bestRolls.contains(int.parse(die.name.substring(1)));
+  final hasNat1AdvOrDis = bestRolls.contains(1);
+
+  return _formatResult(
+      roll: roll,
+      rolls: roll1,
+      modifiers: modifiers,
+      sum: bestResult,
+      hasNat20: hasNat20AdvOrDis,
+      hasNat1: hasNat1AdvOrDis,
+      option: options.toUpperCase(),
+      secondRoll: roll2,
+      diceType: diceType);
 }

@@ -69,6 +69,25 @@ It also supports just rolling some dice with no system selected to allow for som
 > example: /roll 4<br>
 > output: Rolled: [4, 1, 4] + 4 = 13 and generated 4 stunt points!
 
+### Stillfleet (sf)
+
+> /roll skill —- where skill is one of (COM, MOV, REA, WIL, CHA).
+> example: /roll MOV
+> output: CHA d10: [8] = 8
+> 
+> You can also roll with modifiers, A,D,+,-,*,/
+> example: /roll MOV+1
+> output: CHA d10: [9] + 1 = 10
+> 
+> example: /roll MOV A
+> output: CHA with advantage d10: [9] [6]  = 9
+>
+> /set-stillfleet-scores will allow the user to save their skill scores similar to quick rolls.
+> example: /set-stillfleet-scores d10 d8 d8 d6 d4
+> This allows you to use /roll skill, to roll that skill.
+> 
+> 
+
 ### Quick Rolls
 
 > /set-qr num roll -where num is the number 1-10 you want to save the roll to (roll must be valid for current

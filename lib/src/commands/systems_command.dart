@@ -32,24 +32,37 @@ final setSystem = ChatCommand(
           MessageBuilder(content: 'Choose the system you want to use'),
         );
 
-        var user = await us.registerUser(context.user.id);
+        try {
+          //_logger.info('getting user..');
+          var user = await us.registerUser(context.user.id);
+          //_logger.info(user);
+          //_logger.info('user selected: $selection');
+          switch (selection) {
+            case "none":
+              //_logger.info('switch none');
+              user.selectedSystem = System.none;
+            case "asoif":
+              //_logger.info('switch asoif');
+              user.selectedSystem = System.asoif;
+            case "age":
+              //_logger.info('switch age');
+              user.selectedSystem = System.age;
+            case "dnd":
+              //_logger.info('switch dnd');
+              user.selectedSystem = System.dnd;
+            case "sf":
+              //_logger.info('switch sf');
+              user.selectedSystem = System.sf;
+          }
 
-        switch (selection) {
-          case "none":
-            user.selectedSystem = System.none;
-          case "asoif":
-            user.selectedSystem = System.asoif;
-          case "age":
-            user.selectedSystem = System.age;
-          case "dnd":
-            user.selectedSystem = System.dnd;
+          us.userSetSystem(user);
+
+          await context.respond(
+              MessageBuilder(content: "System Set to $selection!"),
+              level: hiddenMessage);
+        }catch(e){
+          _logger.info("error setting system: $e");
         }
-
-        us.userSetSystem(user);
-
-        await context.respond(
-            MessageBuilder(content: "System Set to $selection!"),
-            level: hiddenMessage);
       },
     ));
 
