@@ -39,10 +39,9 @@ void main() async {
   //listen for a mention of
   client.onMessageCreate.listen((event) async {
     if (event.mentions.contains(botUser)) {
-      await event.message.channel.sendMessage(MessageBuilder(
-        content: 'Hi There!',
-        replyId: event.message.id,
-      ));
+      await event.message.channel.sendMessage(
+        MessageBuilder(content: 'Hi There!', replyId: event.message.id),
+      );
     }
   });
 }

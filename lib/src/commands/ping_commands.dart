@@ -10,42 +10,41 @@ final Logger _logger = Logger('ADR.Ping Commands');
 final ping = ChatCommand(
   'ping',
   "Get the bot's latency",
-  id(
-    'ping',
-    (ChatContext context) async {
-      final selection = await context.getSelection(
-        ['Basic', 'Real', 'Gateway'],
-        MessageBuilder(content: 'Choose the latency metric you want to see'),
-      );
+  id('ping', (ChatContext context) async {
+    final selection = await context.getSelection([
+      'Basic',
+      'Real',
+      'Gateway',
+    ], MessageBuilder(content: 'Choose the latency metric you want to see'));
 
-      final latency = switch (selection) {
-        'Basic' => context.client.httpHandler.latency,
-        'Real' => context.client.httpHandler.realLatency,
-        'Gateway' => context.client.gateway.latency,
-        _ => throw StateError('Unexpected selection $selection'),
-      };
+    final latency = switch (selection) {
+      'Basic' => context.client.httpHandler.latency,
+      'Real' => context.client.httpHandler.realLatency,
+      'Gateway' => context.client.gateway.latency,
+      _ => throw StateError('Unexpected selection $selection'),
+    };
 
-      final formattedLatency =
-          (latency.inMicroseconds / Duration.microsecondsPerMillisecond)
-              .toStringAsFixed(3);
+    final formattedLatency =
+        (latency.inMicroseconds / Duration.microsecondsPerMillisecond)
+            .toStringAsFixed(3);
 
-      await context.respond(MessageBuilder(content: '${formattedLatency}ms'),
-          level: hiddenMessage);
-    },
-  ),
+    await context.respond(
+      MessageBuilder(content: '${formattedLatency}ms'),
+      level: hiddenMessage,
+    );
+  }),
 );
 
 final help = ChatCommand(
   'help',
   "List help resources",
-  id(
-    'help',
-    (ChatContext context) async {
-      String response = await readMarkdownFile("help.md");
-      await context.respond(MessageBuilder(content: response),
-          level: hiddenMessage);
-    },
-  ),
+  id('help', (ChatContext context) async {
+    String response = await readMarkdownFile("help.md");
+    await context.respond(
+      MessageBuilder(content: response),
+      level: hiddenMessage,
+    );
+  }),
 );
 
 Future<String> readMarkdownFile(String filePath) async {

@@ -13,10 +13,7 @@ class UserServices {
   final nyxx.Logger _logger = nyxx.Logger('ADR.user_service');
 
   static final UserServices _singleton = UserServices._internal();
-  final supabase = SupabaseClient(
-    supabaseUrl,
-    supabaseKey!,
-  );
+  final supabase = SupabaseClient(supabaseUrl, supabaseKey!);
 
   factory UserServices() {
     return _singleton;
@@ -48,8 +45,8 @@ class UserServices {
 
       await supabase
           .from('user_preferences')
-          .update({'selectedSystem': user.selectedSystem.name}).eq(
-              'id', user.id.toString());
+          .update({'selectedSystem': user.selectedSystem.name})
+          .eq('id', user.id.toString());
       _logger.info('System updated for: ${user.id.toString()}');
     } catch (e) {
       _logger.severe('Error updating system: $e');
@@ -83,7 +80,7 @@ class UserServices {
         'id': id.toString(),
         'selectedSystem': newUser.selectedSystem.toString(),
         'quickRolls': userJson['quickRolls'],
-        'stillfleetScores': userJson['stillfleetScores']
+        'stillfleetScores': userJson['stillfleetScores'],
       });
     } catch (e) {
       _logger.severe("error creating user: $e");
@@ -102,13 +99,14 @@ class UserServices {
       _logger.info(jsonEncode(user));
       //update the QR in the user object
       var qrIndex = user.quickRolls.indexWhere(
-          (element) => element.selectedSystem == user.selectedSystem);
+        (element) => element.selectedSystem == user.selectedSystem,
+      );
       user.quickRolls[qrIndex].setQuickRoll(index, roll);
 
       await supabase
           .from('user_preferences')
-          .update({'quickRolls': jsonEncode(user.quickRolls)}).eq(
-              'id', user.id.toString());
+          .update({'quickRolls': jsonEncode(user.quickRolls)})
+          .eq('id', user.id.toString());
 
       _logger.info('quick roll $index updated for: ${user.id.toString()}');
     } catch (e) {
@@ -117,7 +115,13 @@ class UserServices {
   }
 
   setSFScores(
-      Dice CHA, Dice COM, Dice REA, Dice MOV, Dice WIL, ADRUser user) async {
+    Dice CHA,
+    Dice COM,
+    Dice REA,
+    Dice MOV,
+    Dice WIL,
+    ADRUser user,
+  ) async {
     try {
       _logger.info("setting Stillfleet Scores");
 
@@ -131,8 +135,8 @@ class UserServices {
 
       await supabase
           .from('user_preferences')
-          .update({'stillfleetScores': jsonEncode(user.stillfleetScores)}).eq(
-              'id', user.id.toString());
+          .update({'stillfleetScores': jsonEncode(user.stillfleetScores)})
+          .eq('id', user.id.toString());
 
       _logger.info('scores updated for: ${user.id.toString()}');
     } catch (e) {

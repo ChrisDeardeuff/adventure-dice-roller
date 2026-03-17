@@ -12,8 +12,8 @@ SFScores _$SFScoresFromJson(Map<String, dynamic> json) => SFScores()
   );
 
 Map<String, dynamic> _$SFScoresToJson(SFScores instance) => <String, dynamic>{
-      'scores': instance.scores.map((k, e) => MapEntry(k, _$DiceEnumMap[e])),
-    };
+  'scores': instance.scores.map((k, e) => MapEntry(k, _$DiceEnumMap[e])),
+};
 
 const _$DiceEnumMap = {
   Dice.d4: 0,

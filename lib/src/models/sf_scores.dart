@@ -30,5 +30,5 @@ enum Dice {
   @JsonValue(3)
   d10,
   @JsonValue(4)
-  d12
+  d12,
 }
