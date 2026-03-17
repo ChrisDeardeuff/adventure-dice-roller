@@ -16,10 +16,11 @@ UserServices us = UserServices();
 
 /// Configuration for hiding bot responses from the main chat, sending them as direct messages to the user instead.
 final hiddenMessage = ResponseLevel(
-    hideInteraction: true,
-    isDm: false,
-    mention: true,
-    preserveComponentMessages: true);
+  hideInteraction: true,
+  isDm: false,
+  mention: true,
+  preserveComponentMessages: true,
+);
 
 /// Random number generator for dice rolls.
 var rng = Random();
@@ -28,207 +29,272 @@ var rng = Random();
 final roll = ChatCommand(
   'roll',
   "Default roll for selected system! Visit the documentation or use /roll-help to see valid rolls",
-  id(
-    'roll',
-    (ChatContext context,
-        [@Description(
-            "Required option used to define a roll. Refer to /roll-help for more info")
-        String? roll,
-        @Description(
-            "Optional options used in some systems like 5e. Refer to /roll-help")
-        String options = '']) async {
-      /// 1. Get user data (or create if new) and fetch their selected system.
-      var user = await us.registerUser(context.user.id);
-      var system = user.selectedSystem;
+  id('roll', (
+    ChatContext context, [
+    @Description(
+      "Required option used to define a roll. Refer to /roll-help for more info",
+    )
+    String? roll,
+    @Description(
+      "Optional options used in some systems like 5e. Refer to /roll-help",
+    )
+    String options = '',
+  ]) async {
+    /// 1. Get user data (or create if new) and fetch their selected system.
+    var user = await us.registerUser(context.user.id);
+    var system = user.selectedSystem;
 
-      /// 2. Validate if the roll input is correct for the chosen system.
-      if (roll == null || !isValidRoll(system, roll)) {
-        if (system.name != 'sf') {
-          await context.respond(
-              MessageBuilder(
-                  content:
-                      'roll = $roll - is an invalid roll for system: ${system.name} '
-                      'or roll parameter is empty, please try again or use /help for help.'),
-              level: hiddenMessage);
-        } else {
-          await context.respond(
-              MessageBuilder(
-                  content:
-                      'roll = $roll - is an invalid roll for system: ${system.name} '
-                      'Make sure to set your scores with /set-stillfleet-scores'),
-              level: hiddenMessage);
-        }
+    /// 2. Validate if the roll input is correct for the chosen system.
+    if (roll == null || !isValidRoll(system, roll)) {
+      if (system.name != 'sf') {
+        await context.respond(
+          MessageBuilder(
+            content:
+                'roll = $roll - is an invalid roll for system: ${system.name} '
+                'or roll parameter is empty, please try again or use /help for help.',
+          ),
+          level: hiddenMessage,
+        );
+      } else {
+        await context.respond(
+          MessageBuilder(
+            content:
+                'roll = $roll - is an invalid roll for system: ${system.name} '
+                'Make sure to set your scores with /set-stillfleet-scores',
+          ),
+          level: hiddenMessage,
+        );
+      }
+      return;
+    }
+
+    /// 3. Execute the roll function based on the system, sending the result back to the user.
+    switch (system) {
+      case System.none:
+        await context.respond(MessageBuilder(content: rollNone(roll)));
         return;
-      }
 
-      /// 3. Execute the roll function based on the system, sending the result back to the user.
-      switch (system) {
-        case System.none:
-          await context.respond(MessageBuilder(content: rollNone(roll)));
-          return;
+      case System.asoif:
+        await context.respond(MessageBuilder(content: rollASOIF(roll)));
+        return;
 
-        case System.asoif:
-          await context.respond(MessageBuilder(content: rollASOIF(roll)));
-          return;
+      case System.age:
+        await context.respond(MessageBuilder(content: rollAGE(roll)));
+        return;
 
-        case System.age:
-          await context.respond(MessageBuilder(content: rollAGE(roll)));
-          return;
+      case System.dnd:
+        await context.respond(MessageBuilder(content: rollDnd(roll, options)));
+        return;
+      case System.sf:
+        var user = await us.registerUser(context.user.id);
 
-        case System.dnd:
-          await context
-              .respond(MessageBuilder(content: rollDnd(roll, options)));
+        final burnGritSelection = await context.getSelection([
+          'Yes',
+          'No',
+        ], MessageBuilder(content: 'Do you want to burn grit?'));
+
+        final burnGrit = switch (burnGritSelection) {
+          'Yes' => true,
+          'No' => false,
+          _ => throw StateError('Unexpected selection $burnGritSelection'),
+        };
+
+        if (burnGrit) {
+          final howMuchGrit = await context.getSelection([
+            '3',
+            '6',
+            '9',
+            'MORE??!?',
+          ], MessageBuilder(content: 'How much grit?'));
+
+          final gritToBurn = switch (howMuchGrit) {
+            '3' => 3,
+            '6' => 6,
+            '9' => 9,
+            'MORE??!?' => null,
+            _ => throw StateError('Unexpected selection $howMuchGrit'),
+          };
+
+          if (gritToBurn == null) {
+            await context.respond(
+              MessageBuilder(
+                content:
+                    'You can burn grit in increments of 3, add it to your roll by using +3 (or more) in the Roll argument. example: /roll CHA+3 or /roll 1d10+3',
+              ),
+            );
+            return;
+          }
+          roll = '$roll+$gritToBurn';
+          await context.respond(
+            MessageBuilder(content: rollSF(roll, user, options)),
+          );
           return;
-        case System.sf:
-          var user = await us.registerUser(context.user.id);
-          await context
-              .respond(MessageBuilder(content: rollSF(roll, user, options)));
-      }
-    },
-  ),
+        }
+        await context.respond(
+          MessageBuilder(content: rollSF(roll, user, options)),
+        );
+    }
+  }),
 );
 
 /// Chat command to set a quick roll for a specific system.
 final setQr = ChatCommand(
   'set-qr',
   "Sets a quick roll, an easily executable roll for whatever system is selected",
-  id(
-    'set-qr',
-    (ChatContext context,
-        [@Description(
-            "Required option used to index a quick roll between 1-10. Refer to /help for more info")
-        String? num,
-        @Description(
-            "Required option used to define a roll. Refer to /roll-help for more info")
-        String? roll]) async {
-      if (num == null || roll == null) {
-        await context.respond(
-            MessageBuilder(
-                content:
-                    'Error setting quick roll, please make sure all values are set. Refer to /help if you need help'),
-            level: hiddenMessage);
-        return;
-      }
-      var user = await us.registerUser(context.user.id);
-      var system = user.selectedSystem;
-      var numOfQR = int.parse(num);
-
-      if (!(numOfQR <= 10 && numOfQR >= 1)) {
-        await context.respond(
-            MessageBuilder(
-                content:
-                    'Error setting quick roll, please make sure your number is between 1-10'),
-            level: hiddenMessage);
-        return;
-      }
-      //check if a roll was provided, it is a valid roll for the system, and the number is 1-10
-      if (isValidRoll(system, roll)) {
-        try {
-          await us.setQuickRoll(numOfQR, roll, user);
-        } catch (e) {
-          _logger.severe("error setting quick roll.. $e");
-          await context.respond(MessageBuilder(
-              content:
-                  'Error setting quick roll, please try again in a few minutes. '
-                  'If the error persists please contact dev'));
-          return;
-        }
-      } else {
-        _logger.severe("Invalid Roll or Roll is Null");
-        if (system.name != 'sf') {
-          await context.respond(
-              MessageBuilder(
-                  content:
-                      'roll = $roll - is an invalid roll for system: ${system.name} '
-                      'or roll parameter is empty, please try again or use /help for help.'),
-              level: hiddenMessage);
-        } else {
-          await context.respond(
-              MessageBuilder(
-                  content:
-                      'roll = $roll - is an invalid roll for system: ${system.name} '
-                      'Make sure to set your scores with /set-stillfleet-scores'),
-              level: hiddenMessage);
-        }
-        return;
-      }
-
+  id('set-qr', (
+    ChatContext context, [
+    @Description(
+      "Required option used to index a quick roll between 1-10. Refer to /help for more info",
+    )
+    String? num,
+    @Description(
+      "Required option used to define a roll. Refer to /roll-help for more info",
+    )
+    String? roll,
+  ]) async {
+    if (num == null || roll == null) {
       await context.respond(
-          MessageBuilder(content: 'quick roll $num, set to $roll'),
-          level: hiddenMessage);
-    },
-  ),
+        MessageBuilder(
+          content:
+              'Error setting quick roll, please make sure all values are set. Refer to /help if you need help',
+        ),
+        level: hiddenMessage,
+      );
+      return;
+    }
+    var user = await us.registerUser(context.user.id);
+    var system = user.selectedSystem;
+    var numOfQR = int.parse(num);
+
+    if (!(numOfQR <= 10 && numOfQR >= 1)) {
+      await context.respond(
+        MessageBuilder(
+          content:
+              'Error setting quick roll, please make sure your number is between 1-10',
+        ),
+        level: hiddenMessage,
+      );
+      return;
+    }
+    //check if a roll was provided, it is a valid roll for the system, and the number is 1-10
+    if (isValidRoll(system, roll)) {
+      try {
+        await us.setQuickRoll(numOfQR, roll, user);
+      } catch (e) {
+        _logger.severe("error setting quick roll.. $e");
+        await context.respond(
+          MessageBuilder(
+            content:
+                'Error setting quick roll, please try again in a few minutes. '
+                'If the error persists please contact dev',
+          ),
+        );
+        return;
+      }
+    } else {
+      _logger.severe("Invalid Roll or Roll is Null");
+      if (system.name != 'sf') {
+        await context.respond(
+          MessageBuilder(
+            content:
+                'roll = $roll - is an invalid roll for system: ${system.name} '
+                'or roll parameter is empty, please try again or use /help for help.',
+          ),
+          level: hiddenMessage,
+        );
+      } else {
+        await context.respond(
+          MessageBuilder(
+            content:
+                'roll = $roll - is an invalid roll for system: ${system.name} '
+                'Make sure to set your scores with /set-stillfleet-scores',
+          ),
+          level: hiddenMessage,
+        );
+      }
+      return;
+    }
+
+    await context.respond(
+      MessageBuilder(content: 'quick roll $num, set to $roll'),
+      level: hiddenMessage,
+    );
+  }),
 );
 
 /// Chat command to execute a previously set quick roll.
 final qr = ChatCommand(
   'qr',
   "rolls a quick roll, an easily executable roll for whatever system is selected",
-  id(
-    'qr',
-    (ChatContext context, [String? num]) async {
-      if (num == null) {
-        await context.respond(
-            MessageBuilder(
-                content:
-                    'Error rolling quick roll, please make sure all values are set. Refer to /help if you need help'),
-            level: hiddenMessage);
+  id('qr', (ChatContext context, [String? num]) async {
+    if (num == null) {
+      await context.respond(
+        MessageBuilder(
+          content:
+              'Error rolling quick roll, please make sure all values are set. Refer to /help if you need help',
+        ),
+        level: hiddenMessage,
+      );
+      return;
+    }
+    var user = await us.registerUser(context.user.id);
+    var system = user.selectedSystem;
+    var numOfQR = int.parse(num);
+
+    if (!(numOfQR <= 10 && numOfQR >= 1)) {
+      await context.respond(
+        MessageBuilder(
+          content:
+              'Error rolling quick roll, please make sure your number is between 1-10',
+        ),
+        level: hiddenMessage,
+      );
+      return;
+    }
+    var qrIndex = user.quickRolls.indexWhere(
+      (element) => element.selectedSystem == system,
+    );
+
+    String roll = user.quickRolls[qrIndex].getQuickRoll(numOfQR);
+    _logger.info('roll is $roll');
+    if (roll == 'empty') {
+      await context.respond(
+        MessageBuilder(
+          content:
+              'Error rolling quick roll, please make sure the QR is set, see /help for help',
+        ),
+        level: hiddenMessage,
+      );
+      return;
+    }
+
+    switch (system) {
+      case System.none:
+        await context.respond(MessageBuilder(content: rollNone(roll)));
         return;
-      }
-      var user = await us.registerUser(context.user.id);
-      var system = user.selectedSystem;
-      var numOfQR = int.parse(num);
 
-      if (!(numOfQR <= 10 && numOfQR >= 1)) {
-        await context.respond(
-            MessageBuilder(
-                content:
-                    'Error rolling quick roll, please make sure your number is between 1-10'),
-            level: hiddenMessage);
+      case System.asoif:
+        await context.respond(MessageBuilder(content: rollASOIF(roll)));
         return;
-      }
-      var qrIndex = user.quickRolls
-          .indexWhere((element) => element.selectedSystem == system);
 
-      String roll = user.quickRolls[qrIndex].getQuickRoll(numOfQR);
-      _logger.info('roll is $roll');
-      if (roll == 'empty') {
-        await context.respond(
-            MessageBuilder(
-                content:
-                    'Error rolling quick roll, please make sure the QR is set, see /help for help'),
-            level: hiddenMessage);
+      case System.age:
+        await context.respond(MessageBuilder(content: rollAGE(roll)));
         return;
-      }
 
-      switch (system) {
-        case System.none:
-          await context.respond(MessageBuilder(content: rollNone(roll)));
-          return;
-
-        case System.asoif:
-          await context.respond(MessageBuilder(content: rollASOIF(roll)));
-          return;
-
-        case System.age:
-          await context.respond(MessageBuilder(content: rollAGE(roll)));
-          return;
-
-        case System.dnd:
-          await context.respond(MessageBuilder(content: rollDnd(roll, '')));
-          return;
-        case System.sf:
-        // TODO: Handle this case.
-      }
-    },
-  ),
+      case System.dnd:
+        await context.respond(MessageBuilder(content: rollDnd(roll, '')));
+        return;
+      case System.sf:
+      // TODO: Handle this case.
+    }
+  }),
 );
 
 /// Checks if the given `roll` string is valid for the specified `system`.
 ///
 /// Returns `true` if the roll format matches the system's requirements, otherwise `false`.
 bool isValidRoll(System system, String roll) {
-  var rollPattern = RegExp(r'\b[0-9]{1,6}d[0-9]{1,6}');
+  var rollPattern = RegExp(r'\b[0-9]{1,6}[dD][0-9]{1,6}');
 
   switch (system) {
     case System.none:
@@ -237,7 +303,7 @@ bool isValidRoll(System system, String roll) {
       }
       return false;
     case System.asoif:
-      rollPattern = RegExp(r'\b[0-9]{1,6}b[0-9]{1,6}');
+      rollPattern = RegExp(r'\b[0-9]{1,6}[bB][0-9]{1,6}');
       if (rollPattern.hasMatch(roll)) {
         return true;
       }
@@ -279,7 +345,9 @@ String rollASOIF(String roll) {
 
   //roll base dice and bonus dice
   rolls = rollHelper(
-      numberOfDice: numberOfDice + numberOfBonusDice, numberOfSides: 6);
+    numberOfDice: numberOfDice + numberOfBonusDice,
+    numberOfSides: 6,
+  );
   //sort in descending order
   rolls.sort((b, a) => a.compareTo(b));
   //take only the top x rolls
@@ -338,12 +406,13 @@ String rollDnd(String roll, String options) {
 
   if (options.isEmpty) {
     return _formatResult(
-        roll: roll,
-        rolls: roll1,
-        modifiers: modifiers,
-        sum: result1,
-        hasNat20: hasNat20Roll1,
-        hasNat1: hasNat1Roll1);
+      roll: roll,
+      rolls: roll1,
+      modifiers: modifiers,
+      sum: result1,
+      hasNat20: hasNat20Roll1,
+      hasNat1: hasNat1Roll1,
+    );
   }
 
   // If there are options, determine best/worst roll
@@ -358,14 +427,15 @@ String rollDnd(String roll, String options) {
   final hasNat1AdvOrDis = bestRolls.contains(1);
 
   return _formatResult(
-      roll: roll,
-      rolls: roll1,
-      modifiers: modifiers,
-      sum: bestResult,
-      hasNat20: hasNat20AdvOrDis,
-      hasNat1: hasNat1AdvOrDis,
-      option: options.toUpperCase(),
-      secondRoll: roll2);
+    roll: roll,
+    rolls: roll1,
+    modifiers: modifiers,
+    sum: bestResult,
+    hasNat20: hasNat20AdvOrDis,
+    hasNat1: hasNat1AdvOrDis,
+    option: options.toUpperCase(),
+    secondRoll: roll2,
+  );
 }
 
 //DND/Stillfleet HELPERS
@@ -401,16 +471,17 @@ int _applyModifiers(List<int> rolls, List<(String, int)> modifiers) {
   return sum;
 }
 
-String _formatResult(
-    {required String roll,
-    required List<int> rolls,
-    required List<(String, int)> modifiers,
-    required int sum,
-    required bool hasNat20,
-    required bool hasNat1,
-    int? diceType,
-    String option = "",
-    List<int>? secondRoll}) {
+String _formatResult({
+  required String roll,
+  required List<int> rolls,
+  required List<(String, int)> modifiers,
+  required int sum,
+  required bool hasNat20,
+  required bool hasNat1,
+  int? diceType,
+  String option = "",
+  List<int>? secondRoll,
+}) {
   final modifiersString = modifiers.map((m) => "${m.$1} ${m.$2}").join(" ");
   final optionString = option != ''
       ? " with ${option.toLowerCase() == 'a' ? "advantage" : "disadvantage"}"
@@ -488,18 +559,20 @@ String rollSF(String roll, ADRUser user, String options) {
   final result2 = roll2 != null ? _applyModifiers(roll2, modifiers) : null;
 
   final hasNat20Roll1 = roll1.contains(
-      int.parse(die.name.substring(1))); // Check for a max in the first roll
+    int.parse(die.name.substring(1)),
+  ); // Check for a max in the first roll
   final hasNat1Roll1 = roll1.contains(1); // Check for a 1 in the first roll
 
   if (options.isEmpty) {
     return _formatResult(
-        roll: roll,
-        rolls: roll1,
-        modifiers: modifiers,
-        sum: result1,
-        hasNat20: hasNat20Roll1,
-        hasNat1: hasNat1Roll1,
-        diceType: diceType);
+      roll: roll,
+      rolls: roll1,
+      modifiers: modifiers,
+      sum: result1,
+      hasNat20: hasNat20Roll1,
+      hasNat1: hasNat1Roll1,
+      diceType: diceType,
+    );
   }
 
   // If there are options, determine best/worst roll
@@ -514,13 +587,14 @@ String rollSF(String roll, ADRUser user, String options) {
   final hasNat1AdvOrDis = bestRolls.contains(1);
 
   return _formatResult(
-      roll: roll,
-      rolls: roll1,
-      modifiers: modifiers,
-      sum: bestResult,
-      hasNat20: hasNat20AdvOrDis,
-      hasNat1: hasNat1AdvOrDis,
-      option: options.toUpperCase(),
-      secondRoll: roll2,
-      diceType: diceType);
+    roll: roll,
+    rolls: roll1,
+    modifiers: modifiers,
+    sum: bestResult,
+    hasNat20: hasNat20AdvOrDis,
+    hasNat1: hasNat1AdvOrDis,
+    option: options.toUpperCase(),
+    secondRoll: roll2,
+    diceType: diceType,
+  );
 }

@@ -17,7 +17,7 @@ class QuickRoll {
     'empty',
     'empty',
     'empty',
-    'empty'
+    'empty',
   ];
 
   ///A Quick Roll Object represents all saved quick rolls of a system for a specified user

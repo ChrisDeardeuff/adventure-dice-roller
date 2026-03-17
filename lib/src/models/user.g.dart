@@ -6,9 +6,8 @@ part of 'user.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ADRUser _$ADRUserFromJson(Map<String, dynamic> json) => ADRUser(
-      _snowflakeFromJson(json['id']),
-    )
+ADRUser _$ADRUserFromJson(Map<String, dynamic> json) =>
+    ADRUser(_snowflakeFromJson(json['id']))
       ..selectedSystem = $enumDecode(_$SystemEnumMap, json['selectedSystem'])
       ..quickRolls = (json['quickRolls'] as List<dynamic>)
           .map((e) => QuickRoll.fromJson(e as Map<String, dynamic>))
@@ -16,11 +15,11 @@ ADRUser _$ADRUserFromJson(Map<String, dynamic> json) => ADRUser(
       ..stillfleetScores = _sfScoresFromJson(json['stillfleetScores']);
 
 Map<String, dynamic> _$ADRUserToJson(ADRUser instance) => <String, dynamic>{
-      'selectedSystem': _$SystemEnumMap[instance.selectedSystem]!,
-      'id': _snowflakeToJson(instance.id),
-      'quickRolls': instance.quickRolls.map((e) => e.toJson()).toList(),
-      'stillfleetScores': instance.stillfleetScores.toJson(),
-    };
+  'selectedSystem': _$SystemEnumMap[instance.selectedSystem]!,
+  'id': _snowflakeToJson(instance.id),
+  'quickRolls': instance.quickRolls.map((e) => e.toJson()).toList(),
+  'stillfleetScores': instance.stillfleetScores.toJson(),
+};
 
 const _$SystemEnumMap = {
   System.none: 'none',
