@@ -81,6 +81,46 @@ final roll = ChatCommand(
           return;
         case System.sf:
           var user = await us.registerUser(context.user.id);
+
+          final burnGritSelection = await context.getSelection(
+            ['Yes', 'No'],
+            MessageBuilder(content: 'Do you want to burn grit?'),
+          );
+
+          final burnGrit = switch (burnGritSelection) {
+            'Yes' => true,
+            'No' => false,
+            _ => throw StateError('Unexpected selection $burnGritSelection'),
+          };
+
+          if(burnGrit){
+
+            final howMuchGrit = await context.getSelection(
+              ['3', '6', '9', 'MORE??!?'],
+              MessageBuilder(content: 'How much grit?'),
+            );
+
+            final gritToBurn = switch (howMuchGrit) {
+              '3' => 3,
+              '6' => 6,
+              '9' => 9,
+              'MORE??!?' => null,
+              _ => throw StateError('Unexpected selection $howMuchGrit'),
+            };
+
+            if(gritToBurn == null){
+              await context.respond(
+                  MessageBuilder(
+                      content:
+                      'You can burn grit in increments of 3, add it to your roll by using +3 (or more) in the Roll argument. example: /roll CHA+3 or /roll 1d10+3'));
+              return;
+            }
+            roll = '$roll+$gritToBurn';
+            await context
+                .respond(MessageBuilder(content: rollSF(roll, user, options)));
+            return;
+
+          }
           await context
               .respond(MessageBuilder(content: rollSF(roll, user, options)));
       }
@@ -228,7 +268,7 @@ final qr = ChatCommand(
 ///
 /// Returns `true` if the roll format matches the system's requirements, otherwise `false`.
 bool isValidRoll(System system, String roll) {
-  var rollPattern = RegExp(r'\b[0-9]{1,6}d[0-9]{1,6}');
+  var rollPattern = RegExp(r'\b[0-9]{1,6}[dD][0-9]{1,6}');
 
   switch (system) {
     case System.none:
@@ -237,7 +277,7 @@ bool isValidRoll(System system, String roll) {
       }
       return false;
     case System.asoif:
-      rollPattern = RegExp(r'\b[0-9]{1,6}b[0-9]{1,6}');
+      rollPattern = RegExp(r'\b[0-9]{1,6}[bB][0-9]{1,6}');
       if (rollPattern.hasMatch(roll)) {
         return true;
       }
