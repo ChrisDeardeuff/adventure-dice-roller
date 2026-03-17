@@ -12,6 +12,7 @@ Currently, the bot supports:
 * ASOIF RPG (https://greenronin.com/sifrp/)
 * AGE system (https://greenroninstore.com/collections/age-system)
 * DnD 5e (https://dnd.wizards.com)
+* Grit system (Stillfleet) (https://stillfleet.com)
 
 It also supports just rolling some dice with no system selected to allow for some flexibility.
 
