@@ -1,4 +1,4 @@
-library server;
+library;
 
 export 'src/commands/ping_commands.dart';
 export 'src/commands/roll_commands.dart';

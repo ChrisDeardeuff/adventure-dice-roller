@@ -474,20 +474,36 @@ int _applyModifiers(List<int> rolls, List<(String, int)> modifiers) {
 String _formatResult({
   required String roll,
   required List<int> rolls,
-  required List<(String, int)> modifiers,
+  List<(String, int)>? modifiers,
   required int sum,
-  required bool hasNat20,
-  required bool hasNat1,
+  bool? hasNat20,
+  bool? hasNat1,
   int? diceType,
   String option = "",
   List<int>? secondRoll,
 }) {
-  final modifiersString = modifiers.map((m) => "${m.$1} ${m.$2}").join(" ");
+  final String modifiersString;
+
+  if (modifiers == null) {
+    modifiersString = '';
+  } else {
+    modifiersString = modifiers.map((m) => "${m.$1} ${m.$2}").join(" ");
+  }
   final optionString = option != ''
       ? " with ${option.toLowerCase() == 'a' ? "advantage" : "disadvantage"}"
       : "";
-  final nat20Message = hasNat20 ? ' a max roll!' : '';
-  final nat1Message = hasNat1 ? ' with a critical 1!' : '';
+  final String nat20Message;
+  if (hasNat20 == null || !hasNat20) {
+    nat20Message = '';
+  } else {
+    nat20Message = ' a max roll!';
+  }
+  final String nat1Message;
+  if (hasNat1 == null || !hasNat1) {
+    nat1Message = '';
+  } else {
+    nat1Message = ' with a critical 1!';
+  }
   final secondRollString = secondRoll ?? "";
 
   if (diceType != null) {
@@ -504,12 +520,45 @@ String rollNone(String roll) {
   List<int> rolls = [];
   var sum = 0;
 
+  //check for modifiers, a +-*/ indicate the rest is modifiers
+  if (roll.contains(RegExp(r'([+\-*/])'))) {
+    var startOfModifier = roll.indexOf(RegExp(r'([+\-*/])'));
+    var mod = roll.substring(startOfModifier);
+    var justRoll = roll.substring(0, startOfModifier);
+    var parsedModifier = _parseModifiers(mod);
+
+    int numberOfDice = int.parse(justRoll.substring(0, justRoll.indexOf("d")));
+    int sidesOfDice = int.parse(justRoll.substring(justRoll.indexOf("d") + 1));
+
+    rolls = rollHelper(numberOfDice: numberOfDice, numberOfSides: sidesOfDice);
+    sum = rolls.reduce((value, element) => value + element);
+
+    var finalSum = _applyModifiers(rolls, parsedModifier);
+
+    return _formatResult(
+      roll: roll,
+      rolls: rolls,
+      modifiers: parsedModifier,
+      sum: finalSum,
+      hasNat20: null,
+      hasNat1: null,
+    );
+  }
+
   int numberOfDice = int.parse(roll.substring(0, roll.indexOf("d")));
   int sidesOfDice = int.parse(roll.substring(roll.indexOf("d") + 1));
+
   rolls = rollHelper(numberOfDice: numberOfDice, numberOfSides: sidesOfDice);
   sum = rolls.reduce((value, element) => value + element);
 
-  return '$rolls = $sum';
+  return _formatResult(
+    roll: roll,
+    rolls: rolls,
+    modifiers: null,
+    sum: sum,
+    hasNat20: null,
+    hasNat1: null,
+  );
 }
 
 /// Helper function to perform dice rolls.
