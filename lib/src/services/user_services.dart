@@ -23,7 +23,7 @@ class UserServices {
 
   var users = <nyxx.Snowflake, ADRUser>{};
 
-  supaInit() async {
+  Future<void> supaInit() async {
     try {
       _logger.info('Connecting to database');
 
@@ -36,7 +36,7 @@ class UserServices {
     _logger.info('Connected to database');
   }
 
-  userSetSystem(ADRUser user) async {
+  Future<void> userSetSystem(ADRUser user) async {
     try {
       // var collection = db.collection('user_preferences');
       //
@@ -93,7 +93,7 @@ class UserServices {
   ///index = quick roll number in the system (1-10)
   ///roll = valid roll for the selected system
   ///user = current user of the bot
-  setQuickRoll(int index, String roll, ADRUser user) async {
+  Future<void> setQuickRoll(int index, String roll, ADRUser user) async {
     try {
       _logger.info("setting quick roll");
       _logger.info(jsonEncode(user));
@@ -114,7 +114,7 @@ class UserServices {
     }
   }
 
-  setSFScores(
+  Future<void> setSFScores(
     Dice CHA,
     Dice COM,
     Dice REA,

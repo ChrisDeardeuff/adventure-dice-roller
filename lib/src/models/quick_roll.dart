@@ -24,7 +24,7 @@ class QuickRoll {
   QuickRoll(this.selectedSystem);
 
   /// setQuickRoll adds a provided roll (string) to the provided index - 1 (1-10);
-  setQuickRoll(int index, String roll) {
+  void setQuickRoll(int index, String roll) {
     savedQuickRolls[index - 1] = roll;
   }
 
